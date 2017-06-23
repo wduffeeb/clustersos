@@ -19,6 +19,7 @@ import sys
 
 from socket import timeout
 
+
 class SosNode():
 
     def __init__(self, hostname, config):
@@ -31,17 +32,17 @@ class SosNode():
 
     def info(self, msg):
         '''Used to print and log info messages'''
-        print "%-*s: %s" % (self.config['hostlen']+1,self.hostname, msg)
+        print "%-*s: %s" % (self.config['hostlen']+1, self.hostname, msg)
 
     @property
     def scp_cmd(self):
         '''Configure to scp command to retrieve sosreports'''
         cmd = 'scp -P %s ' % self.config['ssh_port']
-        cmd += '%s@%s:%s* %s' %(self.config['ssh_user'],
-                                self.hostname,
-                                self.sos_path,
-                                self.config['tmp_dir']
-                            )
+        cmd += '%s@%s:%s* %s' % (self.config['ssh_user'],
+                                 self.hostname,
+                                 self.sos_path,
+                                 self.config['tmp_dir']
+                                 )
         return cmd
 
     def sosreport(self):
@@ -58,10 +59,12 @@ class SosNode():
             self.client = paramiko.SSHClient()
             self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             self.client.load_system_host_keys()
-            self.client.connect(self.hostname, username=self.config['ssh_user'], timeout=15)
+            self.client.connect(self.hostname,
+                                username=self.config['ssh_user'],
+                                timeout=15
+                                )
         except paramiko.AuthenticationException:
-            msg = ("Authentication failed. Have you configured key authentication?"
-                )
+            msg = ("Authentication failed. Have you installed SSH keys?")
         except paramiko.BadAuthenticationType:
             msg = ("Bad authentication type. The node rejected authentication"
                    " attempt")
@@ -94,9 +97,9 @@ class SosNode():
         command if needed'''
         self.sos_cmd = self.config['sos_cmd']
         if self.config['profile'].mod_release_string in self.release:
-            self.sos_cmd = '%s %s' %(self.config['profile'].mod_cmd_prefix,
-                                     self.config['sos_cmd']
-                                    )
+            self.sos_cmd = '%s %s' % (self.config['profile'].mod_cmd_prefix,
+                                      self.config['sos_cmd']
+                                      )
 
     def execute_sos_command(self):
         '''Run sosreport and capture the resulting file path'''
@@ -107,16 +110,19 @@ class SosNode():
                                                 timeout=self.config['timeout'],
                                                 get_pty=True
                                             )
-            while not self.stdout.channel.exit_status_ready():      
+            while not self.stdout.channel.exit_status_ready():
                 if self.stdout.channel.recv_ready():
                     for line in iter(lambda: self.stdout.readline(1024), ""):
                         if fnmatch.fnmatch(line, '*sosreport-*tar*'):
-                            self.sos_path = line.strip().replace(self.config['profile'].mod_sos_path, '')
+                            self.sos_path = line.strip().replace(
+                                self.config['profile'].mod_sos_path,
+                                ''
+                                )
             if self.stdout.channel.recv_exit_status() == 0:
                 pass
             else:
                 print stout.read()
-                self.info('Error running sosreport: %s' %self.stderr.read())
+                self.info('Error running sosreport: %s' % self.stderr.read())
         except timeout:
             self.info('Timeout exceeded')
             sys.exit()
@@ -127,18 +133,21 @@ class SosNode():
         '''Collect the sosreport archive from the node'''
         if self.sos_path:
             self.info('Retrieving sosreport...')
-            proc = subprocess.Popen(self.scp_cmd, shell=True, stdout=subprocess.PIPE, 
-                           stderr=subprocess.PIPE)
+            proc = subprocess.Popen(self.scp_cmd,
+                                    shell=True,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE
+                                    )
             stdout, stderr = proc.communicate()
             rc = proc.returncode
-            if rc == 0 :
+            if rc == 0:
                 return True
             else:
-                self.info('Failed to retrieve sosreport. %s' %stderr)
+                self.info('Failed to retrieve sosreport. %s' % stderr)
                 return False
         else:
             # sos sometimes fails but still returns a 0 exit code
-            self.info('Failed to run sosreport. %s' %self.stderr.read())
+            self.info('Failed to run sosreport. %s' % self.stderr.read())
             return False
 
     def remove_sos_archive(self):
@@ -147,7 +156,7 @@ class SosNode():
         try:
             self.client.exec_command('rm -f %s' % self.sos_path)
         except Exception as e:
-            self.info('Failed to remove sosreport on host: %s' %e)
+            self.info('Failed to remove sosreport on host: %s' % e)
 
     def cleanup(self):
         self.remove_sos_archive()
