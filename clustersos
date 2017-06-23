@@ -15,8 +15,8 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 import argparse
 
-from cluster_sos.configuration import Configuration
-from cluster_sos.clustersos import ClusterSos
+from clustersosreport.configuration import Configuration
+from clustersosreport.clustersos import ClusterSos
 
 
 if __name__ == '__main__':
