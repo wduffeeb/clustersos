@@ -12,7 +12,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 import fnmatch
 import os
 import random
@@ -29,6 +28,7 @@ from datetime import datetime
 from cluster_sos.sosnode import SosNode
 from getpass import getpass
 
+
 class ClusterSos():
     """ Main clustersos class """
 
@@ -40,7 +40,6 @@ class ClusterSos():
         self.master = False
         self.retrieved = 0
         self.prep()
-
 
     def create_tmp_dir(self):
         '''Creates a temp directory to transfer sosreports to'''
@@ -70,9 +69,9 @@ class ClusterSos():
             nstr += '-%s' % self.config['name']
         if self.config['case_id']:
             nstr += '-%s' % self.config['case_id']
-        dt = datetime.strftime(datetime.now(),'%Y-%m-%d')
+        dt = datetime.strftime(datetime.now(), '%Y-%m-%d')
         rand = ''.join(random.choice(string.lowercase) for x in range(5))
-        return '%s-%s-%s' %(nstr, dt, rand)
+        return '%s-%s-%s' % (nstr, dt, rand)
 
     def _get_archive_path(self):
         name = self._get_archive_name()
@@ -92,23 +91,24 @@ class ClusterSos():
             rpms = subprocess.Popen(rpm_cmd, shell=True,
                                     stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE
-                                )
+                                    )
             stdout, stderr = rpms.communicate()
         else:
-            stdin, stdout, stderr = self.master.client.exec_command(rpm_cmd, timeout=30)
-            stdout = str(stdout.readlines())
+            sin, sout, serr = self.master.client.exec_command(rpm_cmd,
+                                                              timeout=30
+                                                              )
+            stdout = str(sout.readlines())
         if stdout:
             self.config['packages'] = [r for r in stdout.split()]
-
 
     def prep(self):
         '''Based on configuration, performs setup for collection'''
         print ('This utility is designed to collect sosreports from '
                'multiple nodes simultaneously.\n'
-            )
+               )
         print ('Please note that clustersos REQUIRES key authentication '
                'for SSH to be in place for node sosreport collection\n'
-            )
+               )
         if self.config['master']:
             self.connect_to_master()
             self.config['no_local'] = True
@@ -129,10 +129,10 @@ class ClusterSos():
         '''Prints initial messages and collects user and case if not
         provided already.
         '''
-        print 'Cluster type has been set to %s' %self.config['cluster_type']
+        print 'Cluster type has been set to %s' % self.config['cluster_type']
         print '\nThe following is a list of nodes to collect from:'
         for node in self.node_list:
-            print "\t%-*s" %(self.config['hostlen'], node)
+            print "\t%-*s" % (self.config['hostlen'], node)
 
         if not self.config['name']:
             msg = '\nPlease enter your first inital and last name: '
@@ -160,7 +160,7 @@ class ClusterSos():
 
     def determine_cluster(self):
         '''This sets the cluster type and loads that cluster's profile.
-        
+
         If no cluster type is matched and no list of nodes is provided by
         the user, then we abort.
 
@@ -185,7 +185,8 @@ class ClusterSos():
     def reduce_node_list(self):
         '''Reduce duplicate entries of the localhost and/or master node
         if applicable'''
-        if self.config['hostname'] in self.node_list and not self.config['no_local']:
+        if (self.config['hostname'] in self.node_list and not
+                self.config['no_local']):
             self.node_list.remove(self.config['hostname'])
         for i in self.config['ip_addrs']:
             if i in self.node_list:
@@ -227,34 +228,43 @@ class ClusterSos():
             cmd = self.config['sos_cmd']
             cmd += ' --tmp-dir=%s' % self.config['tmp_dir']
             if self.need_local_sudo:
-                cmd = 'echo %s | sudo -S %s' %(self.local_sudopw, cmd)
-            print "%-*s: %s" % (self.config['hostlen']+1,
+                cmd = 'echo %s | sudo -S %s' % (self.local_sudopw, cmd)
+            print "%-*s: %s" % (self.config['hostlen'] + 1,
                                 self.config['hostname'],
                                 'Generating sosreport...'
-                            )
-            proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, 
-                           stderr=subprocess.PIPE)
+                                )
+            proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
             rc = proc.returncode
             if rc == 0:
                 self.retrieved += 1
-                print "%-*s: %s" % (self.config['hostlen']+1,
-                        self.config['hostname'],
-                        'Retrieving sosreport...'
-                                )
+                print "%-*s: %s" % (self.config['hostlen'] + 1,
+                                    self.config['hostname'],
+                                    'Retrieving sosreport...'
+                                    )
                 if self.need_local_sudo:
                     for line in stdout.split('\n'):
                         if fnmatch.fnmatch(line, '*sosreport-*tar*'):
                             self.local_sos_path = line.strip()
-                    cmd = 'echo %s | sudo -S chown %s:%s %s' %(self.local_sudopw, os.geteuid(), os.geteuid(), self.local_sos_path)
-                    proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    cmd = 'echo %s | sudo -S chown %s:%s %s' % (
+                                            self.local_sudopw,
+                                            os.geteuid(),
+                                            os.geteuid(),
+                                            self.local_sos_path
+                                            )
+                    proc = subprocess.Popen(cmd,
+                                            shell=True,
+                                            stdout=subprocess.PIPE,
+                                            stderr=subprocess.PIPE
+                                            )
                     stdout, stderr = proc.communicate()
                     del(self.local_sudopw)
             else:
-                print "%-*s: %s" % (self.config['hostlen']+1,
-                                    self.config['hostname'],
-        '                           Failed to collect sosreport'
-                                )
+                print "%-*s: %s %s" % (self.config['hostlen'] + 1,
+                                       self.config['hostname'],
+                                       'Failed to collect sosreport'
+                                       )
         except Exception as e:
             print e
 
@@ -283,7 +293,9 @@ class ClusterSos():
         for node in self.workers:
             if node.retrieved:
                 self.retrieved += 1
-        print '\nSuccessfully captured %s of %s node sosreports' %(self.retrieved, self.report_num)
+        print '\nSuccessfully captured %s of %s sosreports' % (self.retrieved,
+                                                               self.report_num
+                                                               )
         if self.retrieved > 0:
             self.create_cluster_archive()
         else:
@@ -331,5 +343,3 @@ class ClusterSos():
             for f in os.listdir(self.config['tmp_dir']):
                 if re.search('*sosreport-*tar*', f):
                     os.remove(os.path.join(self.config['tmp_dir'], f))
-
-

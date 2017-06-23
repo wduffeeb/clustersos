@@ -25,41 +25,47 @@ if __name__ == '__main__':
             'nodes and package them in a single useful tar archive.\n\n'
             'Most sosreport options are supported by clustersos and are '
             'passed directly to the sosreport command run on each node.')
-    
+
     parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument('-a', '--alloptions', action='store_true', help='Enable all sos options')
-    parser.add_argument('--all-logs', action='store_true', help='Collect logs regardless of size')
+    parser.add_argument('-a', '--alloptions', action='store_true',
+                        help='Enable all sos options')
+    parser.add_argument('--all-logs', action='store_true',
+                        help='Collect logs regardless of size')
     parser.add_argument('--case-id', help='Specify case number')
     parser.add_argument('--cluster-type',
-                            help='Specify a type of cluster profile'
+                        help='Specify a type of cluster profile'
                         )
     parser.add_argument('-e', '--enable-plugins', required=False,
-                            help='Enable specific plugins for sosreport'
+                        help='Enable specific plugins for sosreport'
                         )
     parser.add_argument('-k', '--plugin-option',
-                            help='Plugin option as plugname.option=value'
+                        help='Plugin option as plugname.option=value'
                         )
     parser.add_argument('-n', '--skip-plugins', help='Skip these plugins')
     parser.add_argument('--name', help='Specify customer name')
-    parser.add_argument('--nodes', help='Provide a comma delimited list of nodes')
+    parser.add_argument('--nodes',
+                        help='Provide a comma delimited list of nodes')
     parser.add_argument('--no-pkg-check', action='store_true',
-                            help=('Do not run package checks. Use this '
-                                  'with --cluster-type if there are rpm '
-                                  'or apt issues on node'
-                            )
+                        help=('Do not run package checks. Use this '
+                              'with --cluster-type if there are rpm '
+                              'or apt issues on node'
+                              )
                         )
-    parser.add_argument('--no-local', action='store_true', help='Do not collect a sosreport from the local system')
+    parser.add_argument('--no-local', action='store_true',
+                        help='Do not collect a sosreport from localhost')
     parser.add_argument('--master', help='Specify a remote master node')
-    parser.add_argument('-o', '--only-plugins', type=list, help='Run these plugins only')
-    parser.add_argument('-p', '--ssh-port', help='Specify SSH port for all nodes')
-    parser.add_argument('--ssh-user', help='Specify an SSH user. This is the user that will run sosreport. Default root')
+    parser.add_argument('-o', '--only-plugins', type=list,
+                        help='Run these plugins only')
+    parser.add_argument('-p', '--ssh-port',
+                        help='Specify SSH port for all nodes')
+    parser.add_argument('--ssh-user',
+                        help='Specify an SSH user. Default root')
     parser.add_argument('--timeout', type=int, required=False,
-                            help='Timeout for sosreport generation on each node. Default 180.'
+                        help='Timeout for sosreport on each node. Default 180.'
                         )
-    parser.add_argument('--tmp-dir', help='Specify a temp directory to save sos archives to')
-
+    parser.add_argument(
+        '--tmp-dir', help='Specify a temp directory to save sos archives to')
 
     config = Configuration(parser)
     cs = ClusterSos(config)
     cs.collect()
-
