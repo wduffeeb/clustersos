@@ -121,7 +121,6 @@ class SosNode():
             if self.stdout.channel.recv_exit_status() == 0:
                 pass
             else:
-                print stout.read()
                 self.info('Error running sosreport: %s' % self.stderr.read())
         except timeout:
             self.info('Timeout exceeded')

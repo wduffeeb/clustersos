@@ -25,7 +25,7 @@ setup(
     maintainer_email = 'jhunsake@redhat.com',
     license = 'GPL',
     url='',
-    packages = ['cluster_sos'],
+    packages = ['clustersosreport', 'clustersosreport/profiles'],
     scripts = ['clustersos'],
     cmdclass={'install_data': InstallData},
     data_files = [

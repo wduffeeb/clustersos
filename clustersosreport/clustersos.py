@@ -25,8 +25,9 @@ import subprocess
 import sys
 
 from datetime import datetime
-from cluster_sos.sosnode import SosNode
+from clustersosreport.sosnode import SosNode
 from getpass import getpass
+from distutils.sysconfig import get_python_lib
 
 
 class ClusterSos():
@@ -52,7 +53,8 @@ class ClusterSos():
         shutil.rmtree(self.config['tmp_dir'])
 
     def _load_profiles(self):
-        path = 'cluster_sos/profiles'
+        p = get_python_lib()
+        path = p + '/clustersosreport/profiles/'
         self.profiles = {}
         sys.path.insert(0, path)
         for f in sorted(os.listdir(path)):
