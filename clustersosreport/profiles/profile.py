@@ -31,6 +31,23 @@ class Profile():
         self.sos_container_cmd = ''
         self.node_cmd = ''
         cleanup_cmd = ''
+        if not getattr(self, "option_list", False):
+            self.option_list = []
+        self.options = []
+        self._get_options()
+
+    def _get_options(self):
+        for opt in self.config['cluster_options']:
+            if self.cluster_type in opt:
+                self.options.append((opt.split('.')[1], self.config['cluster_options'][opt]))
+
+    def get_option(self, option):
+        '''This is used to by profiles to check if a cluster option was
+        supplied to clustersos.'''
+        for opt in self.options:
+            if option == opt[0]:
+                return opt[1]
+        return False
 
     def exec_node_cmd(self, cmd):
         '''Used to retrieve output from a (master) node in a cluster

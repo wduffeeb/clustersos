@@ -23,6 +23,7 @@ class Configuration(dict):
         self.parser = parser
         self.set_defaults()
         self.parse_config()
+        self.parse_cluster_options()
 
     def set_defaults(self):
         self['sos_mod'] = {}
@@ -49,9 +50,18 @@ class Configuration(dict):
         self['hostname'] = socket.gethostname()
         ips = [i[4][0] for i in socket.getaddrinfo(socket.gethostname(), None)]
         self['ip_addrs'] = list(set(ips))
+        self['cluster_options'] = []
 
     def parse_config(self):
         args = vars(self.parser.parse_args())
         for k in args:
             if args[k]:
                 self[k] = args[k]
+
+    def parse_cluster_options(self):
+        if self['cluster_options']:
+            opts = {}
+            for opt in self['cluster_options']:
+                k, v = opt.split('=', 1)
+                opts[k] = v
+            self['cluster_options'] = opts

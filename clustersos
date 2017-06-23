@@ -35,6 +35,11 @@ if __name__ == '__main__':
     parser.add_argument('--cluster-type',
                         help='Specify a type of cluster profile'
                         )
+    parser.add_argument('-c', '--cluster-option', type=str, action="append", dest='cluster_options',
+                        help=('Specify a cluster options used by a profile'
+                              ' and takes the form of cluster.option=value'
+                              )
+                        )
     parser.add_argument('-e', '--enable-plugins', required=False,
                         help='Enable specific plugins for sosreport'
                         )

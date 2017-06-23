@@ -53,8 +53,11 @@ class ClusterSos():
         shutil.rmtree(self.config['tmp_dir'])
 
     def _load_profiles(self):
-        p = get_python_lib()
-        path = p + '/clustersosreport/profiles/'
+        if 'clustersosreport' not in os.listdir(os.getcwd()):
+            p = get_python_lib()
+            path = p + '/clustersosreport/profiles/'
+        else:
+            path = 'clustersosreport/profiles'
         self.profiles = {}
         sys.path.insert(0, path)
         for f in sorted(os.listdir(path)):
