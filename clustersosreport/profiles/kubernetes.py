@@ -21,6 +21,10 @@ class kubernetes(Profile):
     sos_options = {'kubernetes.all': 'on'}
     cleanup_cmd = 'docker rm clustersos-tmp'
 
+    option_list = [
+                ('label', 'Restrict nodes to those with matching label')
+                ]
+
     mod_release_string = 'Atomic'
     mod_cmd_prefix = ('atomic run --name=clustersos-tmp '
                       'registry.access.redhat.com/rhel7/rhel-tools ')
@@ -34,7 +38,10 @@ class kubernetes(Profile):
 
     def get_nodes(self):
         nodes = []
-        n = self.exec_node_cmd('kubectl get nodes')
+        cmd = 'kubectl get nodes'
+        if self.get_option('label'):
+            cmd += ' -l %s' % self.get_option('label')
+        n = self.exec_node_cmd(cmd)
         nodes = [node.split()[0] for node in n]
         nodes.remove("NAME")
         return nodes
