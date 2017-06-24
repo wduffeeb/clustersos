@@ -24,13 +24,6 @@ class Profile():
         self.node_list = None
         sos_options = {}
         sos_plugins = []
-        mod_cmd_prefix = ''
-        mod_sos_path = ''
-        mod_release_string = ''
-        self.sos_cmd_mod = ''
-        self.sos_container_cmd = ''
-        self.node_cmd = ''
-        cleanup_cmd = ''
         if not getattr(self, "option_list", False):
             self.option_list = []
         self.options = []
@@ -49,7 +42,7 @@ class Profile():
                 return opt[1]
         return False
 
-    def exec_node_cmd(self, cmd):
+    def exec_master_cmd(self, cmd):
         '''Used to retrieve output from a (master) node in a cluster
         profile.'''
         if self.master:
@@ -63,8 +56,64 @@ class Profile():
         if proc.returncode == 0:
                 return stdout
 
+    def get_sos_prefix(self, facts):
+        '''This wraps set_sos_prefix used by cluster profiles.
+        It is called by sosnode.finalize_sos_cmd() for each node'''
+        try:
+            return self.set_sos_prefix(facts)
+        except:
+            return ''
+
+    def set_sos_prefix(self, facts):
+        '''This should be overridden by cluster profiles when needed.
+
+        In a profile this should return a string that is placed immediately
+        before the 'sosreport' command, but will be after sudo if needed
+        '''
+        return ''
+
+    def get_sos_path_strip(self, facts):
+        '''This calls set_sos_path_strip that is used by cluster profiles
+        to determine if we need to remove a particular string from a 
+        returned sos path for any reason'''
+        try:
+            return self.set_sos_path_strip(facts)
+        except:
+            return ''
+
+    def set_sos_path_strip(self, facts):
+        '''This should be overriden by a cluster profile and used to set
+        a string to be stripped from the return sos path if needed.
+
+        For example, on Atomic Host, the sosreport gets written under 
+        /host/var/tmp in the container, but is available to scp under the
+        standard /var/tmp after the container exits.'''
+        return ''
+
+    def get_cleanup_cmd(self, facts):
+        '''This calls set_cleanup_cmd that is used by cluser profiles to
+        determine if clustersos needs to do additional cleanup on a node'''
+        try:
+            return self.set_cleanup_cmd(facts)
+        except:
+            return False
+
+    def set_cleanup_cmd(self, facts):
+        '''This should be overridden by a cluster profile and used to set
+        an additional command to run during cleanup.
+
+        The profile should return a string containing the full cleanup 
+        command to run'''
+        return ''
 
     def check_enabled(self):
+        '''This should be overridden by cluster profiles
+
+        This is called by clustersos on each profile that exists, and is
+        meant to return True when the cluster profile matches a criteria
+        that indicates that cluster type is in use.
+
+        Only the first cluster type to determine a match is run'''
         return False
 
     def get_nodes(self):

@@ -17,18 +17,13 @@ from profile import Profile
 
 class kubernetes(Profile):
 
+
     sos_plugins = ['kubernetes']
     sos_options = {'kubernetes.all': 'on'}
-    cleanup_cmd = 'docker rm clustersos-tmp'
 
     option_list = [
                 ('label', 'Restrict nodes to those with matching label')
                 ]
-
-    mod_release_string = 'Atomic'
-    mod_cmd_prefix = ('atomic run --name=clustersos-tmp '
-                      'registry.access.redhat.com/rhel7/rhel-tools ')
-    mod_sos_path = '/host'
 
     def check_enabled(self):
         for k in self.config['packages']:
@@ -41,7 +36,21 @@ class kubernetes(Profile):
         cmd = 'kubectl get nodes'
         if self.get_option('label'):
             cmd += ' -l %s' % self.get_option('label')
-        n = self.exec_node_cmd(cmd)
+        n = self.exec_master_cmd(cmd)
         nodes = [node.split()[0] for node in n]
         nodes.remove("NAME")
         return nodes
+
+    def set_sos_prefix(self, facts):
+        if 'Atomic' in facts['release']:
+            cmd = 'atomic run --name=clustersos-tmp '
+            img = 'registry.access.redhat.com/rhel7/rhel-tools '
+            return cmd + img
+
+    def set_sos_path_strip(self, facts):
+        if 'Atomic' in facts['release']:
+            return '/host'
+
+    def set_cleanup_cmd(self, facts):
+        if 'Atomic' in facts['release']:
+            return 'docker rm clustersos-tmp'

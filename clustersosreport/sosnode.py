@@ -27,6 +27,7 @@ class SosNode():
         self.config = config
         self.sos_path = None
         self.retrieved = False
+        self.host_facts = {}
         self.open_ssh_session()
         self.load_host_facts()
 
@@ -90,16 +91,23 @@ class SosNode():
         '''Obtain information about the node which can be referneced by
         cluster profiles to change the sosreport command'''
         sin, sout, serr = self.client.exec_command('cat /etc/redhat-release')
-        self.release = sout.read()
+        self.host_facts['release'] = sout.read().strip()
 
     def finalize_sos_cmd(self):
-        '''Use host fact and compare to cluster profile to modify the sos
+        '''Use host facts and compare to cluster profile to modify the sos
         command if needed'''
         self.sos_cmd = self.config['sos_cmd']
-        if self.config['profile'].mod_release_string in self.release:
-            self.sos_cmd = '%s %s' % (self.config['profile'].mod_cmd_prefix,
-                                      self.config['sos_cmd']
-                                      )
+        prefix = self.config['profile'].get_sos_prefix(self.host_facts)
+        if prefix:
+            self.sos_cmd = prefix + ' ' + self.sos_cmd
+
+    def finalize_sos_path(self, path):
+        '''Use host facts to determine if we need to change the sos path
+        we are retrieving from'''
+        pstrip = self.config['profile'].get_sos_path_strip(self.host_facts)
+        if pstrip:
+            return path.replace(pstrip, '')
+        return path
 
     def execute_sos_command(self):
         '''Run sosreport and capture the resulting file path'''
@@ -114,10 +122,7 @@ class SosNode():
                 if self.stdout.channel.recv_ready():
                     for line in iter(lambda: self.stdout.readline(1024), ""):
                         if fnmatch.fnmatch(line, '*sosreport-*tar*'):
-                            self.sos_path = line.strip().replace(
-                                self.config['profile'].mod_sos_path,
-                                ''
-                                )
+                            self.sos_path = self.finalize_sos_path(line.strip())
             if self.stdout.channel.recv_exit_status() == 0:
                 pass
             else:
@@ -126,7 +131,7 @@ class SosNode():
             self.info('Timeout exceeded')
             sys.exit()
         except Exception as e:
-            self.info(e)
+            self.info('Error running sosreport: %s' % e)
 
     def retrieve_sosreport(self):
         '''Collect the sosreport archive from the node'''
@@ -146,7 +151,11 @@ class SosNode():
                 return False
         else:
             # sos sometimes fails but still returns a 0 exit code
-            self.info('Failed to run sosreport. %s' % self.stderr.read())
+            if self.stderr.read():
+               err = self.stderr.read()
+            else:
+                err = [x.strip() for x in self.stdout.readlines() if x.strip][-1]
+            self.info('Failed to run sosreport. %s' % err)
             return False
 
     def remove_sos_archive(self):
@@ -159,7 +168,7 @@ class SosNode():
 
     def cleanup(self):
         self.remove_sos_archive()
-        sin, sout, serr = self.client.exec_command(
-                                self.config['profile'].cleanup_cmd,
-                                timeout=15
-                            )
+        cleanup = self.config['profile'].get_cleanup_cmd(self.host_facts)
+        if cleanup:
+            sin, sout, serr = self.client.exec_command(cleanup, timeout=15)
+    
