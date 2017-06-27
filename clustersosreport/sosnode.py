@@ -50,8 +50,9 @@ class SosNode():
         '''Run a sosreport on the node, then collect it'''
         self.finalize_sos_cmd()
         self.execute_sos_command()
-        self.retrieved = self.retrieve_sosreport()
-        self.cleanup()
+        if self.sos_path:
+            self.retrieved = self.retrieve_sosreport()
+            self.cleanup()
 
     def open_ssh_session(self):
         '''Create the persistent ssh session we use on the node'''
@@ -126,7 +127,8 @@ class SosNode():
             if self.stdout.channel.recv_exit_status() == 0:
                 pass
             else:
-                self.info('Error running sosreport: %s' % self.stderr.read())
+                err = self.stdout.readlines()[-1].strip()
+                self.info('Error running sosreport: %s' % err)
         except timeout:
             self.info('Timeout exceeded')
             sys.exit()
