@@ -22,13 +22,14 @@ from socket import timeout
 
 class SosNode():
 
-    def __init__(self, hostname, config):
-        self.hostname = hostname
+    def __init__(self, address, config):
+        self.address = address
         self.config = config
         self.sos_path = None
         self.retrieved = False
         self.host_facts = {}
         self.open_ssh_session()
+        self.get_hostname()
         self.load_host_facts()
 
     def info(self, msg):
@@ -46,6 +47,10 @@ class SosNode():
                                  )
         return cmd
 
+    def get_hostname(self):
+        sin, sout, serr = self.client.exec_command('hostname')
+        self.hostname = sout.read().strip()
+
     def sosreport(self):
         '''Run a sosreport on the node, then collect it'''
         self.finalize_sos_cmd()
@@ -61,7 +66,7 @@ class SosNode():
             self.client = paramiko.SSHClient()
             self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             self.client.load_system_host_keys()
-            self.client.connect(self.hostname,
+            self.client.connect(self.address,
                                 username=self.config['ssh_user'],
                                 timeout=15
                                 )

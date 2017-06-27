@@ -197,10 +197,12 @@ class ClusterSos():
             if i in self.node_list:
                 self.node_list.remove(i)
         if self.config['master']:
-            if self.config['hostname'] in self.node_list:
-                self.node_list.remove(self.config['hostname'])
-            if self.config['master'] not in self.node_list:
-                self.node_list.append(self.config['master'])
+            count = 0
+            for n in self.node_list:
+                if n == self.master.hostname or n == self.config['master']:
+                    count +=1
+                    if count > 1:
+                        self.node_list.remove(n)
 
     def get_nodes(self):
         ''' Sets the list of nodes to collect sosreports from '''
@@ -208,7 +210,8 @@ class ClusterSos():
             self.node_list = [n for n in self.config['nodes'].split(',')]
         else:
             self.node_list = self.get_nodes_from_cluster()
-        self.node_list.append(self.config['hostname'])
+        if not self.config['master']:
+            self.node_list.append(self.config['hostname'])
         self.reduce_node_list()
         self.report_num = len(self.node_list)
         self.config['hostlen'] = len(max(self.node_list, key=len))
