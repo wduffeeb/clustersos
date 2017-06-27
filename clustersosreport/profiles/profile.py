@@ -22,8 +22,9 @@ class Profile():
         self.config = config
         self.cluster_type = self.__class__.__name__
         self.node_list = None
-        sos_options = {}
         sos_plugins = []
+        if not getattr(self, 'sos_options', False):
+            self.sos_options = {}
         if not getattr(self, "option_list", False):
             self.option_list = []
         self.options = []
