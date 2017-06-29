@@ -24,9 +24,17 @@ class pacemaker(Profile):
         return False
 
     def get_nodes(self):
-        node_list = []
-        cmd = 'pcs cluster status'
+        cmd = 'pcs status'
         n = self.exec_master_cmd(cmd)
-        idx = n.index("PCSD Status:")+1
-        node_list = [node.split()[0].strip(':') for node in n[idx:]]
+        node_list = self.parse_pcs_output(n)
         return node_list
+
+    def parse_pcs_output(self, pcs):
+        nodes = []
+        for s in ['Online', 'Offline']:
+            for i in pcs:
+                if i.startswith('%s:' % s):
+                    n = [i.split('[')[1].split(' ')[1:-1]][0]
+                    if n:
+                        nodes += n
+        return nodes
