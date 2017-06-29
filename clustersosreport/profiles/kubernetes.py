@@ -26,17 +26,19 @@ class kubernetes(Profile):
                 ]
 
     def check_enabled(self):
-        for k in self.config['packages']:
-            if 'kubernetes' in k:
-                return True
+        if 'kubernetes-master' in self.config['packages']:
+            self.cmd = 'kubectl '
+            return True
+        if 'atomic-openshift-master' in self.config['packages']:
+            self.cmd = 'oc '
+            return True
         return False
 
     def get_nodes(self):
-        nodes = []
-        cmd = 'kubectl get nodes'
+        self.cmd += 'get nodes '
         if self.get_option('label'):
-            cmd += ' -l %s' % self.get_option('label')
-        n = self.exec_master_cmd(cmd)
+            self.cmd += '-l %s ' % self.get_option('label')
+        n = self.exec_master_cmd(self.cmd)
         nodes = [node.split()[0] for node in n]
         nodes.remove("NAME")
         return nodes
