@@ -24,6 +24,7 @@ class SosNode():
 
     def __init__(self, address, config):
         self.address = address
+        self.hostname = ''
         self.config = config
         self.sos_path = None
         self.retrieved = False
@@ -34,14 +35,17 @@ class SosNode():
 
     def info(self, msg):
         '''Used to print and log info messages'''
-        print "%-*s: %s" % (self.config['hostlen']+1, self.hostname, msg)
+        print '{: <.{}} : {}'.format((self.hostname or self.address),
+                                     self.config['hostlen'],
+                                     msg
+                                     )
 
     @property
     def scp_cmd(self):
         '''Configure to scp command to retrieve sosreports'''
         cmd = 'scp -P %s ' % self.config['ssh_port']
         cmd += '%s@%s:%s* %s' % (self.config['ssh_user'],
-                                 self.hostname,
+                                 self.address,
                                  self.sos_path,
                                  self.config['tmp_dir']
                                  )
@@ -128,7 +132,8 @@ class SosNode():
                 if self.stdout.channel.recv_ready():
                     for line in iter(lambda: self.stdout.readline(1024), ""):
                         if fnmatch.fnmatch(line, '*sosreport-*tar*'):
-                            self.sos_path = self.finalize_sos_path(line.strip())
+                            line = line.strip()
+                            self.sos_path = self.finalize_sos_path(line)
             if self.stdout.channel.recv_exit_status() == 0:
                 pass
             else:
@@ -159,10 +164,10 @@ class SosNode():
         else:
             # sos sometimes fails but still returns a 0 exit code
             if self.stderr.read():
-               err = self.stderr.read()
+                e = self.stderr.read()
             else:
-                err = [x.strip() for x in self.stdout.readlines() if x.strip][-1]
-            self.info('Failed to run sosreport. %s' % err)
+                e = [x.strip() for x in self.stdout.readlines() if x.strip][-1]
+            self.info('Failed to run sosreport. %s' % e)
             return False
 
     def remove_sos_archive(self):
@@ -178,4 +183,3 @@ class SosNode():
         cleanup = self.config['profile'].get_cleanup_cmd(self.host_facts)
         if cleanup:
             sin, sout, serr = self.client.exec_command(cleanup, timeout=15)
-    

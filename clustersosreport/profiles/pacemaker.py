@@ -35,7 +35,7 @@ class pacemaker(Profile):
              '(IPs used in setup?)')
         if warn in pcs:
             print ('NOTE: pacemaker is reporting a node name mismatch. '
-                   'Attempts to connect to some of these nodes may fail')
+                   'Attempts to connect to some of these nodes may fail\n')
         for s in ['Online', 'Offline']:
             for i in pcs:
                 if i.startswith('%s:' % s):

@@ -136,6 +136,8 @@ class ClusterSos():
         '''
         print 'Cluster type has been set to %s' % self.config['cluster_type']
         print '\nThe following is a list of nodes to collect from:'
+        if self.master:
+            print '\t%-*s' % (self.config['hostlen'], self.config['master'])
         for node in self.node_list:
             print "\t%-*s" % (self.config['hostlen'], node)
 
@@ -196,13 +198,12 @@ class ClusterSos():
         for i in self.config['ip_addrs']:
             if i in self.node_list:
                 self.node_list.remove(i)
+        # remove the master node from the list, since we already have
+        # an open session to it.
         if self.config['master']:
-            count = 0
             for n in self.node_list:
                 if n == self.master.hostname or n == self.config['master']:
-                    count +=1
-                    if count > 1:
-                        self.node_list.remove(n)
+                    self.node_list.remove(n)
 
     def get_nodes(self):
         ''' Sets the list of nodes to collect sosreports from '''
@@ -214,6 +215,8 @@ class ClusterSos():
             self.node_list.append(self.config['hostname'])
         self.reduce_node_list()
         self.report_num = len(self.node_list)
+        if self.master:
+            self.report_num += 1
         self.config['hostlen'] = len(max(self.node_list, key=len))
 
     def can_run_local_sos(self):
@@ -279,15 +282,14 @@ class ClusterSos():
     def collect(self):
         ''' For each node, start a collection thread and then tar all
         collected sosreports '''
-
         # local sosreport
         if not self.config['no_local']:
-            if self.can_run_local_sos() and not self.config['master']:
+            if not self.config['master'] and self.can_run_local_sos():
                 worker = threading.Thread(target=self.local_sosreport)
                 worker.start()
                 self.threads.append(worker)
-            if self.master:
-                self.client_list.append(self.master)
+        if self.master:
+            self.client_list.append(self.master)
         for node in self.node_list:
             client = SosNode(node, self.config)
             self.client_list.append(client)
