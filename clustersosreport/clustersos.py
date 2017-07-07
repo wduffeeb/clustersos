@@ -181,9 +181,9 @@ class ClusterSos():
                 name = str(self.profiles[prof].__class__.__name__).lower()
                 self.config['cluster_type'] = name
                 break
-            print ('Could not determine cluster type and no list of nodes'
-                   ' was provided.\nAborting...')
-            sys.exit()
+                print ('Could not determine cluster type and no list of nodes'
+                       ' was provided.\nAborting...')
+                sys.exit()
 
     def get_nodes_from_cluster(self):
         '''Collects the list of nodes from the determined cluster profile'''
@@ -303,6 +303,10 @@ class ClusterSos():
         for node in self.workers:
             if node.retrieved:
                 self.retrieved += 1
+        if self.master:
+            f = self.config['profile'].run_extra_cmd()
+            if f:
+                self.master.collect_extra_cmd(f)
         print '\nSuccessfully captured %s of %s sosreports' % (self.retrieved,
                                                                self.report_num
                                                                )

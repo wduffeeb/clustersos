@@ -14,8 +14,8 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 import subprocess
 
-class Profile():
 
+class Profile():
 
     def __init__(self, config, master):
         self.master = master
@@ -33,7 +33,10 @@ class Profile():
     def _get_options(self):
         for opt in self.config['cluster_options']:
             if self.cluster_type in opt:
-                self.options.append((opt.split('.')[1], self.config['cluster_options'][opt]))
+                self.options.append((opt.split('.')[1],
+                                     self.config['cluster_options'][opt]
+                                     )
+                                    )
 
     def get_option(self, option):
         '''This is used to by profiles to check if a cluster option was
@@ -48,14 +51,22 @@ class Profile():
         profile.'''
         if self.master:
             stdin, stdout, stderr = self.master.client.exec_command(cmd)
+            rc = stdout.channel.recv_exit_status()
             sout = stdout.read().splitlines()
-            return sout
-        proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, 
-                           stderr=subprocess.PIPE)
+            if rc == 0:
+                return (sout or True)
+            else:
+                return False
+        proc = subprocess.Popen(cmd,
+                                shell=True,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE
+                                )
         stdout, stderr = proc.communicate()
         rc = proc.returncode
         if proc.returncode == 0:
                 return stdout
+        return False
 
     def get_sos_prefix(self, facts):
         '''This wraps set_sos_prefix used by cluster profiles.
@@ -75,7 +86,7 @@ class Profile():
 
     def get_sos_path_strip(self, facts):
         '''This calls set_sos_path_strip that is used by cluster profiles
-        to determine if we need to remove a particular string from a 
+        to determine if we need to remove a particular string from a
         returned sos path for any reason'''
         try:
             return self.set_sos_path_strip(facts)
@@ -86,7 +97,7 @@ class Profile():
         '''This should be overriden by a cluster profile and used to set
         a string to be stripped from the return sos path if needed.
 
-        For example, on Atomic Host, the sosreport gets written under 
+        For example, on Atomic Host, the sosreport gets written under
         /host/var/tmp in the container, but is available to scp under the
         standard /var/tmp after the container exits.'''
         return ''
@@ -103,7 +114,7 @@ class Profile():
         '''This should be overridden by a cluster profile and used to set
         an additional command to run during cleanup.
 
-        The profile should return a string containing the full cleanup 
+        The profile should return a string containing the full cleanup
         command to run'''
         return ''
 
@@ -139,11 +150,12 @@ class Profile():
         if self.sos_plugins:
             for plug in self.sos_plugins:
                 if plug not in self.config['sos_cmd']:
-                    self.config['sos_cmd'] += '-e %s ' %plug 
+                    self.config['sos_cmd'] += '-e %s ' % plug
         if self.sos_options:
             for opt in self.sos_options:
                 if opt not in self.config['sos_cmd']:
-                    self.config['sos_cmd'] += '-k %s=%s ' %(opt, self.sos_options[opt])
+                    cmd = '-k %s=%s ' % (opt, self.sos_options[opt])
+                    self.config['sos_cmd'] += cmd
 
     def format_node_list(self):
         try:
@@ -157,13 +169,13 @@ class Profile():
         except Exception as e:
             print e
 
-    def extra_data_collection(self):
+    def run_extra_cmd(self):
         '''This method is called against the master/local node at the end
         of collection. It is meant to be used to specify additional data
         that should be collected along with sosreports.
 
         Ideally, anything specified here should eventually make its way
-        into sos ideally.
+        into sos.
 
         If a cluster uses this command, it should return a file path or a
         list of file paths.

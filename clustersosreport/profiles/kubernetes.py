@@ -17,7 +17,6 @@ from profile import Profile
 
 class kubernetes(Profile):
 
-
     sos_plugins = ['kubernetes']
     sos_options = {'kubernetes.all': 'on'}
 

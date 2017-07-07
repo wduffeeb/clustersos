@@ -183,3 +183,14 @@ class SosNode():
         cleanup = self.config['profile'].get_cleanup_cmd(self.host_facts)
         if cleanup:
             sin, sout, serr = self.client.exec_command(cleanup, timeout=15)
+
+    def collect_extra_cmd(self, filename):
+        scp = self.scp_cmd.replace(self.sos_path, filename)
+        proc = subprocess.Popen(scp,
+                                shell=True,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE
+                                )
+        sout, serr = proc.communicate()
+        if proc.returncode == 0:
+            return True
