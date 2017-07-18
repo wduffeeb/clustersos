@@ -16,12 +16,8 @@ from profile import Profile
 
 class pacemaker(Profile):
 
-    sos_plugins = {'pacemaker'}
-
-    def check_enabled(self):
-        if 'pacemaker' in self.config['packages']:
-            return True
-        return False
+    sos_plugins = ['pacemaker']
+    packages = ('pacemaker',)
 
     def get_nodes(self):
         cmd = 'pcs status'
