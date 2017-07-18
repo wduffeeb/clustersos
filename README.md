@@ -20,11 +20,21 @@ If it is being run on a workstation, then it can still be used provided that SSH
 In this example, `master.example.com` will need to be able to enumerate all other nodes in the cluster. SSH sessions will be opened from the local workstation, NOT from the master node.
 
 # Cluster types/support
-clustersos will attempt to identify the type of cluster environment it is being run against through the use of cluster profiles. These are effectively plugins and live under `cluster_sos/profiles`. The most basic type of check is a package check, e.g. if it is a kubernetes cluster then clustersos would at minimum look for the presence of the kubernetes package.
+clustersos will attempt to identify the type of cluster environment it is being run against through the use of cluster profiles. These are effectively plugins and live under `clustersosreport/profiles`.
+
+The most basic type of check is a package check, e.g. if it is a kubernetes cluster then clustersos would at minimum look for the presence of the kubernetes package.
 
 You can also manually force a specific type of cluster using `--cluster-type`, E.G.
 
 `$ clustersos --master=master.example.com --cluster-type=kubernetes`
+
+# Node enumeration
+
+The profile for each cluster contains the logic to enumerate and report the nodes in the cluster to clustersos. However, a user may also specify a list of nodes alongside a given `--master` or `--cluster-type`. In the event that neither is provided, the first node in the list given to clustersos is considered to be the master node. For example:
+
+`$ clustersos --nodes=node1.example.com,node2.example.com`
+
+
 
 # Installation
 
