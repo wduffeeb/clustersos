@@ -16,7 +16,7 @@ class InstallData(install_data):
 
 setup(
     name='clustersos',
-    version = '1.0',
+    version = '1.1',
     description = 'Capture sosreports from multiple nodes simultaneously',
     long_description = "Clustersos is a utility designed to capture sosreports from multiple nodes at once and collect them into a single archive. If the nodes are part of a cluster, profiles can be used to configure how the sosreport command is run on the nodes.",
     author = 'Jake Hunsaker',
