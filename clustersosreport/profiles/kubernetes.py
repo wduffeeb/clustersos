@@ -19,21 +19,17 @@ class kubernetes(Profile):
 
     sos_plugins = ['kubernetes']
     sos_options = {'kubernetes.all': 'on'}
+    packages = ('kubernetes-master', 'atomic-openshift-master')
 
     option_list = [
                 ('label', 'Restrict nodes to those with matching label')
                 ]
 
-    def check_enabled(self):
-        if 'kubernetes-master' in self.config['packages']:
-            self.cmd = 'kubectl '
-            return True
-        if 'atomic-openshift-master' in self.config['packages']:
-            self.cmd = 'oc '
-            return True
-        return False
-
     def get_nodes(self):
+        if self.is_installed('atomic-openshift-master'):
+            self.cmd = 'oc '
+        else:
+            self.cmd = 'kubectl '
         self.cmd += 'get nodes '
         if self.get_option('label'):
             self.cmd += '-l %s ' % self.get_option('label')

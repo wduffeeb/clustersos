@@ -23,6 +23,8 @@ class Profile():
         self.cluster_type = self.__class__.__name__
         self.node_list = None
         sos_plugins = []
+        if not getattr(self, 'packages', False):
+            self.packages = ('',)
         if not getattr(self, 'sos_options', False):
             self.sos_options = {}
         if not getattr(self, "option_list", False):
@@ -45,6 +47,9 @@ class Profile():
             if option == opt[0]:
                 return opt[1]
         return False
+
+    def is_installed(self, pkg):
+        return pkg in self.config['packages']
 
     def exec_master_cmd(self, cmd):
         '''Used to retrieve output from a (master) node in a cluster
@@ -119,13 +124,16 @@ class Profile():
         return ''
 
     def check_enabled(self):
-        '''This should be overridden by cluster profiles
+        '''This may be overridden by cluster profiles
 
         This is called by clustersos on each profile that exists, and is
         meant to return True when the cluster profile matches a criteria
         that indicates that cluster type is in use.
 
         Only the first cluster type to determine a match is run'''
+        for pkg in self.packages:
+            if pkg in self.config['packages']:
+                return True
         return False
 
     def get_nodes(self):
