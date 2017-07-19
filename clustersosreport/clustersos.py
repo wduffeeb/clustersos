@@ -122,7 +122,7 @@ class ClusterSos():
             self.load_packages()
         if self.config['cluster_type']:
             self.config['profile'] = self.profiles[self.config['cluster_type']]
-        if not self.config['nodes']:
+        else:
             self.determine_cluster()
         if not self.config['tmp_dir']:
             self.create_tmp_dir()

@@ -71,6 +71,10 @@ if __name__ == '__main__':
     parser.add_argument(
         '--tmp-dir', help='Specify a temp directory to save sos archives to')
 
-    config = Configuration(parser)
-    cs = ClusterSos(config)
-    cs.collect()
+    try:
+        config = Configuration(parser)
+        cs = ClusterSos(config)
+        cs.collect()
+    except KeyboardInterrupt:
+        raise SystemExit()
+    
