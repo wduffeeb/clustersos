@@ -5,7 +5,7 @@ MAJOR   := $(shell echo $(VERSION) | cut -f 1 -d '.')
 MINOR   := $(shell echo $(VERSION) | cut -f 2 -d '.')
 RELEASE := $(shell echo `awk '/^Release:/ {gsub(/\%.*/,""); print $2}' clustersos.spec`)
 
-DIRS = clustersosreport clustersosreport/profiles
+DIRS = clustersos clustersos/profiles
 PYFILE = $(wildcard *.py)
 
 
@@ -27,7 +27,7 @@ install:
 	mkdir -p $(DESTDIR)/usr/share/man/man1
 	mkdir -p $(DESTDIR)/usr/share/$(NAME)
 	@gzip -c man/en/clustersos.1 > clustersos.1.gz
-	install -m755 clustersos $(DESTDIR)/usr/sbin/clustersos
+	install -m755 clustersosreport $(DESTDIR)/usr/sbin/clustersosreport
 	install -m644 clustersos.1.gz $(DESTDIR)/usr/share/man/man1/.
 	install -m644 README.md $(DESTDIR)/usr/share/$(NAME)/.
 	for d in $(DIRS); do make DESTDIR=`cd $(DESTDIR); pwd` -C $$d install; [ $$? = 0 ] || exit ; done
