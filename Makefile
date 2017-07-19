@@ -6,7 +6,7 @@ MINOR   := $(shell echo $(VERSION) | cut -f 2 -d '.')
 RELEASE := $(shell echo `awk '/^Release:/ {gsub(/\%.*/,""); print $2}' clustersos.spec`)
 REPO	= https://github.com/turboturtle/clustersos
 
-SUBDIRS = clustersosreport clustersosreport/profiles
+SUBDIRS = clustersos clustersos/profiles
 PYFILE = $(wildcard *.py)
 
 
@@ -26,12 +26,12 @@ SRC_BUILD = $(DIST_BUILD_DIR)/sdist
 install:
 	mkdir -p $(DESTDIR)/usr/sbin
 	mkdir -p $(DESTDIR)/usr/share/man/man1
-	mkdir -p $(DESTDIR)/usr/share/clustersosreport
-	@gzip -c man/en/clustersos.1 > clustersos.1.gz
+	mkdir -p $(DESTDIR)/usr/share/clustersos
+	@gzip -c man/en/clustersosreport.1 > clustersosreport.1.gz
 	mkdir -p $(DESTDIR)/etc
-	install -m755 clustersos $(DESTDIR)/usr/sbin/clustersos
-	install -m644 clustersos.1.gz $(DESTDIR)/usr/share/man/man1/.
-	install -m644 README.md $(DESTDIR)/usr/share/clustersosreport/.
+	install -m755 clustersosreport $(DESTDIR)/usr/sbin/clustersosreport
+	install -m644 clustersosreport.1.gz $(DESTDIR)/usr/share/man/man1/.
+	install -m644 README.md $(DESTDIR)/usr/share/clustersos/.
 	for d in $(SUBDIRS); do make DESTDIR=`cd $(DESTDIR); pwd` -C $$d install; [ $$? = 0 ] || exit 1; done
 
 $(NAME)-$(VERSION).tar.gz: clean

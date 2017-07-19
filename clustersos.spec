@@ -37,8 +37,8 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files
 %defattr(-,root,root,-)
-%{_sbindir}/clustersos
-%{_datadir}/clustersosreport/
+%{_sbindir}/clustersosreport
+%{_datadir}/clustersos/
 %{python_sitelib}/*
 %{_mandir}/man1/*
 
