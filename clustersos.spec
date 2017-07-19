@@ -1,5 +1,4 @@
 %{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
-%{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
 
 Summary: Capture sosreports from multiple nodes simultaneously
@@ -30,7 +29,6 @@ make
 %install
 rm -rf ${RPM_BUILD_ROOT}
 make DESTDIR=${RPM_BUILD_ROOT} install
-%find_lang %{name} || echo 0
 
 %clean
 rm -rf ${RPM_BUILD_ROOT}

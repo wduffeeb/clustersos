@@ -11,6 +11,8 @@ PYFILE = $(wildcard *.py)
 
 
 DIST_BUILD_DIR = dist-build
+DESTDIR = dist-build
+
 RPM_DEFINES = --define "_topdir %(pwd)/$(DIST_BUILD_DIR)" \
 	--define "_builddir %{_topdir}" \
 	--define "_rpmdir %{_topdir}" \
@@ -26,12 +28,11 @@ SRC_BUILD = $(DIST_BUILD_DIR)/sdist
 install:
 	mkdir -p $(DESTDIR)/usr/sbin
 	mkdir -p $(DESTDIR)/usr/share/man/man1
-	mkdir -p $(DESTDIR)/usr/share/clustersos
+	mkdir -p $(DESTDIR)/usr/share/$(NAME)
 	@gzip -c man/en/clustersosreport.1 > clustersosreport.1.gz
-	mkdir -p $(DESTDIR)/etc
 	install -m755 clustersosreport $(DESTDIR)/usr/sbin/clustersosreport
 	install -m644 clustersosreport.1.gz $(DESTDIR)/usr/share/man/man1/.
-	install -m644 README.md $(DESTDIR)/usr/share/clustersos/.
+	install -m644 README.md $(DESTDIR)/usr/share/$(NAME)/.
 	for d in $(SUBDIRS); do make DESTDIR=`cd $(DESTDIR); pwd` -C $$d install; [ $$? = 0 ] || exit 1; done
 
 $(NAME)-$(VERSION).tar.gz: clean
@@ -43,11 +44,10 @@ build:
 	for d in $(SUBDIRS); do make -C $$d; [ $$? = 0 ] || exit 1 ; done
 
 rpm: clean $(NAME)-$(VERSION).tar.gz
-	$(RPM_CMD) -tb $(DIST_BUILD_DIR)/$(NAME)-$(VERSION).tar.gz
-	
+	$(RPM_CMD) -bb clustersos.spec
 
 srpm: clean $(NAME)-$(VERSION).tar.gz
-	$(RPM_CMD) -ts $(DIST_BUILD_DIR)/$(NAME)-$(VERSION).tar.gz
+	$(RPM_CMD) -bs clustersos.spec
 
 clean:
 	$(RM) -rf $(DIST_BUILD_DIR)
