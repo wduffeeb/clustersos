@@ -1,4 +1,5 @@
 %{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
+%{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
 
 Summary: Capture sosreports from multiple nodes simultaneously
@@ -38,8 +39,8 @@ rm -rf ${RPM_BUILD_ROOT}
 %defattr(-,root,root,-)
 %{_sbindir}/clustersos
 %{_datadir}/clustersosreport/
+%{python_sitelib}/*
 %{_mandir}/man1/*
-%doc README.md LICENSE
 
 %changelog
 * Tue Jul 18 2017 Jake Hunsaker <jhunsake@redhat.com> 1.1

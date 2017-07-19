@@ -4,8 +4,9 @@ VERSION := $(shell echo `awk '/^Version:/ {print $$2}' clustersos.spec`)
 MAJOR   := $(shell echo $(VERSION) | cut -f 1 -d '.')
 MINOR   := $(shell echo $(VERSION) | cut -f 2 -d '.')
 RELEASE := $(shell echo `awk '/^Release:/ {gsub(/\%.*/,""); print $2}' clustersos.spec`)
+REPO	= https://github.com/turboturtle/clustersos
 
-DIRS = clustersosreport clustersosreport/profiles
+SUBDIRS = clustersosreport clustersosreport/profiles
 PYFILE = $(wildcard *.py)
 
 
@@ -20,17 +21,18 @@ RPM = rpmbuild
 RPM_CMD = $(RPM) $(RPM_DEFINES)
 PKG_DIR = $(DIST_BUILD_DIR)/$(NAME)-$(VERSION)
 
-SRC_BUILD = $(DIST_BUILD_DIR)/srcdist
+SRC_BUILD = $(DIST_BUILD_DIR)/sdist
 
 install:
 	mkdir -p $(DESTDIR)/usr/sbin
 	mkdir -p $(DESTDIR)/usr/share/man/man1
-	mkdir -p $(DESTDIR)/usr/share/$(NAME)
+	mkdir -p $(DESTDIR)/usr/share/clustersosreport
 	@gzip -c man/en/clustersos.1 > clustersos.1.gz
+	mkdir -p $(DESTDIR)/etc
 	install -m755 clustersos $(DESTDIR)/usr/sbin/clustersos
 	install -m644 clustersos.1.gz $(DESTDIR)/usr/share/man/man1/.
-	install -m644 README.md $(DESTDIR)/usr/share/$(NAME)/.
-	for d in $(DIRS); do make DESTDIR=`cd $(DESTDIR); pwd` -C $$d install; [ $$? = 0 ] || exit ; done
+	install -m644 README.md $(DESTDIR)/usr/share/clustersosreport/.
+	for d in $(SUBDIRS); do make DESTDIR=`cd $(DESTDIR); pwd` -C $$d install; [ $$? = 0 ] || exit 1; done
 
 $(NAME)-$(VERSION).tar.gz: clean
 	@mkdir -p $(PKG_DIR)
@@ -38,7 +40,7 @@ $(NAME)-$(VERSION).tar.gz: clean
 	@tar Ccvzf $(DIST_BUILD_DIR) $(DIST_BUILD_DIR)/$(NAME)-$(VERSION).tar.gz $(NAME)-$(VERSION) --exclude-vcs
 
 build:
-	for d in $(DIRS); do make -C $$d; [ $$? = 0 ] || exit 1 ; done
+	for d in $(SUBDIRS); do make -C $$d; [ $$? = 0 ] || exit 1 ; done
 
 rpm: clean $(NAME)-$(VERSION).tar.gz
 	$(RPM_CMD) -tb $(DIST_BUILD_DIR)/$(NAME)-$(VERSION).tar.gz
@@ -48,6 +50,4 @@ srpm: clean $(NAME)-$(VERSION).tar.gz
 	$(RPM_CMD) -ts $(DIST_BUILD_DIR)/$(NAME)-$(VERSION).tar.gz
 
 clean:
-	$(RM) -rf dist/
-	$(RM) -rf build/ *.rpm
 	$(RM) -rf $(DIST_BUILD_DIR)
