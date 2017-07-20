@@ -52,6 +52,7 @@ class SosNode():
         return cmd
 
     def get_hostname(self):
+        '''Get the node's hostname'''
         sin, sout, serr = self.client.exec_command('hostname')
         self.hostname = sout.read().strip()
 
@@ -141,6 +142,7 @@ class SosNode():
                 self.info('Error running sosreport: %s' % err)
         except timeout:
             self.info('Timeout exceeded')
+            # TODO: remove the tmp dir that sos was using
             sys.exit()
         except Exception as e:
             self.info('Error running sosreport: %s' % e)
@@ -179,12 +181,14 @@ class SosNode():
             self.info('Failed to remove sosreport on host: %s' % e)
 
     def cleanup(self):
+        '''Remove the sos archive from the node once we have it locally'''
         self.remove_sos_archive()
         cleanup = self.config['profile'].get_cleanup_cmd(self.host_facts)
         if cleanup:
             sin, sout, serr = self.client.exec_command(cleanup, timeout=15)
 
     def collect_extra_cmd(self, filename):
+        '''Collect the file created by a profile outside of sos'''
         scp = self.scp_cmd.replace(self.sos_path, filename)
         proc = subprocess.Popen(scp,
                                 shell=True,

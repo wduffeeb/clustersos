@@ -11,11 +11,11 @@ clustersos leverages paramiko to open SSH sessions to the target nodes from the 
 
 If clustersos is being run on a node that is part of the cluster being investigated, it can be run as simply as:
 
-`$ clustersos`
+`$ clustersosreport`
 
 If it is being run on a workstation, then it can still be used provided that SSH keys for that workstation are installed on the target nodes. To do this, specify a "master" node in the cluster:
 
-`$ clustersos --master=master.example.com`
+`$ clustersosreport --master=master.example.com`
 
 In this example, `master.example.com` will need to be able to enumerate all other nodes in the cluster. SSH sessions will be opened from the local workstation, NOT from the master node.
 
@@ -26,13 +26,13 @@ The most basic type of check is a package check, e.g. if it is a kubernetes clus
 
 You can also manually force a specific type of cluster using `--cluster-type`, E.G.
 
-`$ clustersos --master=master.example.com --cluster-type=kubernetes`
+`$ clustersosreport --master=master.example.com --cluster-type=kubernetes`
 
 # Node enumeration
 
 The profile for each cluster contains the logic to enumerate and report the nodes in the cluster to clustersos. However, a user may also specify a list of nodes alongside a given `--master` or `--cluster-type`. In the event that neither is provided, the first node in the list given to clustersos is considered to be the master node. For example:
 
-`$ clustersos --nodes=node1.example.com,node2.example.com`
+`$ clustersosreport --nodes=node1.example.com,node2.example.com`
 
 
 
@@ -40,7 +40,7 @@ The profile for each cluster contains the logic to enumerate and report the node
 
 You can run clustersos from the git checkout, E.G.
 
-`$ ./clustersos`
+`$ ./clustersosreport`
 
 To make an rpm, just run
 
