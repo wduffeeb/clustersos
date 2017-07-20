@@ -21,12 +21,14 @@ from clustersos.clustersosreport import ClusterSos
 
 if __name__ == '__main__':
 
+    use = 'clustersos [options]'
+
     desc = ('Clustersos is a utility to collect sosreports from multiple '
             'nodes and package them in a single useful tar archive.\n\n'
             'Most sosreport options are supported by clustersos and are '
             'passed directly to the sosreport command run on each node.')
 
-    parser = argparse.ArgumentParser(description=desc)
+    parser = argparse.ArgumentParser(description=desc, usage=use)
     parser.add_argument('-a', '--alloptions', action='store_true',
                         help='Enable all sos options')
     parser.add_argument('--all-logs', action='store_true',
