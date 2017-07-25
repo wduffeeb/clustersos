@@ -3,7 +3,7 @@
 
 Summary: Capture sosreports from multiple nodes simultaneously
 Name: clustersos
-Version: 1.1
+Version: 1.1.0
 Release: 1%{?dist}
 Source0: http://people.redhat.com/jhunsake/clustersos/releases/clustersos-%{version}.tar.gz
 License: GPLv2
