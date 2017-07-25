@@ -120,6 +120,12 @@ class SosNode():
             return path.replace(pstrip, '')
         return path
 
+    def determine_sos_error(self, rc, stdout):
+        if rc == 137:
+            return "sosreport killed on node"
+        if len(stdout) > 0:
+            return stdout[-1]
+
     def execute_sos_command(self):
         '''Run sosreport and capture the resulting file path'''
         self.info('Generating sosreport...')
@@ -135,10 +141,11 @@ class SosNode():
                         if fnmatch.fnmatch(line, '*sosreport-*tar*'):
                             line = line.strip()
                             self.sos_path = self.finalize_sos_path(line)
-            if self.stdout.channel.recv_exit_status() == 0:
+            rc = self.stdout.channel.recv_exit_status()
+            if rc == 0:
                 pass
             else:
-                err = self.stdout.readlines()[-1].strip()
+                err = self.determine_sos_error(rc, self.stdout.readlines())
                 self.info('Error running sosreport: %s' % err)
         except timeout:
             self.info('Timeout exceeded')
