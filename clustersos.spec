@@ -7,12 +7,9 @@ Version: 1.1.0
 Release: 1%{?dist}
 Source0: http://people.redhat.com/jhunsake/clustersos/releases/clustersos-%{version}.tar.gz
 License: GPLv2
-Group: Applications/System
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 BuildArch: noarch
 Url: https://github.com/TurboTurtle/clustersos
-Requires: python >= 2.6
-Requires: python-argparse
+Requires: python >= 2.7
 Requires: python-paramiko >= 1.6
 Requires: sos >= 3.0
 
@@ -24,14 +21,13 @@ Clustersos is a utility designed to capture sosreports from multiple nodes at on
 %setup -q
 
 %build
-make
+%py2_build
 
 %install
-rm -rf ${RPM_BUILD_ROOT}
-make DESTDIR=${RPM_BUILD_ROOT} install
+%py2_install
 
-%clean
-rm -rf ${RPM_BUILD_ROOT}
+%check
+%{__python2} setup.py test
 
 %files
 %defattr(-,root,root,-)
@@ -41,8 +37,8 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_mandir}/man1/*
 
 %changelog
-* Tue Jul 18 2017 Jake Hunsaker <jhunsake@redhat.com> 1.1
+* Tue Jul 18 2017 Jake Hunsaker <jhunsake@redhat.com> 1.1.0
 - Basic profiles now available
 
-* Tue Jun 20 2017 Jake Hunsaker <jhunsake@redhat.com> 1.0
+* Tue Jun 20 2017 Jake Hunsaker <jhunsake@redhat.com> 1.0.0
 - Initial build
