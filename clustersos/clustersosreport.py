@@ -26,6 +26,7 @@ import sys
 
 from datetime import datetime
 from clustersos.sosnode import SosNode
+from distutils.sysconfig import get_python_lib
 from getpass import getpass
 from six.moves import input
 
