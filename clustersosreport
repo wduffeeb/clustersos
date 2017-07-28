@@ -10,9 +10,9 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 import argparse
 
 from clustersos.configuration import Configuration
@@ -37,13 +37,19 @@ if __name__ == '__main__':
     parser.add_argument('--cluster-type',
                         help='Specify a type of cluster profile'
                         )
-    parser.add_argument('-c', '--cluster-option', type=str, action="append", dest='cluster_options',
+    parser.add_argument('-c', '--cluster-option', type=str, action="append",
+                        dest='cluster_options',
                         help=('Specify a cluster options used by a profile'
                               ' and takes the form of cluster.option=value'
                               )
                         )
     parser.add_argument('-e', '--enable-plugins', required=False,
                         help='Enable specific plugins for sosreport'
+                        )
+    parser.add_argument('--image', help=('Specify the container image to use'
+                                         ' for atomic hosts. Defaults to '
+                                         'the rhel7/rhel-tools image'
+                                         )
                         )
     parser.add_argument('-k', '--plugin-option',
                         help='Plugin option as plugname.option=value'
@@ -70,8 +76,9 @@ if __name__ == '__main__':
     parser.add_argument('--timeout', type=int, required=False,
                         help='Timeout for sosreport on each node. Default 180.'
                         )
-    parser.add_argument(
-        '--tmp-dir', help='Specify a temp directory to save sos archives to')
+    parser.add_argument('--tmp-dir',
+                        help='Specify a temp directory to save sos archives to'
+                        )
 
     try:
         config = Configuration(parser)
@@ -79,4 +86,3 @@ if __name__ == '__main__':
         cs.collect()
     except KeyboardInterrupt:
         raise SystemExit()
-    

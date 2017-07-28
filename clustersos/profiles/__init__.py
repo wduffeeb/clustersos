@@ -9,9 +9,9 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 import subprocess
 
 
@@ -59,7 +59,7 @@ class Profile():
             rc = stdout.channel.recv_exit_status()
             sout = stdout.read().splitlines()
             if rc == 0:
-                return (sout or True)
+                return ([s.decode('utf-8') for s in sout] or True)
             else:
                 return False
         proc = subprocess.Popen(cmd,
@@ -70,7 +70,7 @@ class Profile():
         stdout, stderr = proc.communicate()
         rc = proc.returncode
         if proc.returncode == 0:
-                return stdout
+            return str(stdout, 'utf-8')
         return False
 
     def get_sos_prefix(self, facts):
@@ -143,7 +143,7 @@ class Profile():
         try:
             return self.format_node_list()
         except Exception as e:
-            print e
+            print('Failed to get node list: %s' % e)
             return []
 
     def modify_sos_cmd(self):
@@ -175,7 +175,7 @@ class Profile():
                 node_list = list(set(nodes))
             return node_list
         except Exception as e:
-            print e
+            print('Failed to format node list: %s' % e)
 
     def run_extra_cmd(self):
         '''This method is called against the master/local node at the end

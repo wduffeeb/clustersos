@@ -9,9 +9,9 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 import fnmatch
 import os
 import random
@@ -27,7 +27,7 @@ import sys
 from datetime import datetime
 from clustersos.sosnode import SosNode
 from getpass import getpass
-from distutils.sysconfig import get_python_lib
+from six.moves import input
 
 
 class ClusterSos():
@@ -75,6 +75,12 @@ class ClusterSos():
         if self.config['case_id']:
             nstr += '-%s' % self.config['case_id']
         dt = datetime.strftime(datetime.now(), '%Y-%m-%d')
+
+        try:
+            string.lowercase = string.ascii_lowercase
+        except NameError:
+            pass
+
         rand = ''.join(random.choice(string.lowercase) for x in range(5))
         return '%s-%s-%s' % (nstr, dt, rand)
 
@@ -108,12 +114,12 @@ class ClusterSos():
 
     def prep(self):
         '''Based on configuration, performs setup for collection'''
-        print ('This utility is designed to collect sosreports from '
-               'multiple nodes simultaneously.\n'
-               )
-        print ('Please note that clustersos REQUIRES key authentication '
-               'for SSH to be in place for node sosreport collection\n'
-               )
+        print('This utility is designed to collect sosreports from '
+              'multiple nodes simultaneously.\n'
+              )
+        print('Please note that clustersos REQUIRES key authentication '
+              'for SSH to be in place for node sosreport collection\n'
+              )
         if self.config['master']:
             self.connect_to_master()
             self.config['no_local'] = True
@@ -134,19 +140,19 @@ class ClusterSos():
         '''Prints initial messages and collects user and case if not
         provided already.
         '''
-        print 'Cluster type has been set to %s' % self.config['cluster_type']
-        print '\nThe following is a list of nodes to collect from:'
+        print('Cluster type has been set to %s' % self.config['cluster_type'])
+        print('\nThe following is a list of nodes to collect from:')
         if self.master:
-            print '\t%-*s' % (self.config['hostlen'], self.config['master'])
+            print('\t%-*s' % (self.config['hostlen'], self.config['master']))
         for node in self.node_list:
-            print "\t%-*s" % (self.config['hostlen'], node)
+            print("\t%-*s" % (self.config['hostlen'], node))
 
         if not self.config['name']:
             msg = '\nPlease enter your first inital and last name: '
-            self.config['name'] = raw_input(msg)
+            self.config['name'] = input(msg)
         if not self.config['case_id']:
             msg = 'Please enter the case id you are collecting reports for: '
-            self.config['case_id'] = raw_input(msg)
+            self.config['case_id'] = input(msg)
 
     def configure_sos_cmd(self):
         '''Configures the sosreport command that is run on the nodes'''
@@ -181,8 +187,9 @@ class ClusterSos():
                 name = str(self.profiles[prof].__class__.__name__).lower()
                 self.config['cluster_type'] = name
                 break
-                print ('Could not determine cluster type and no list of nodes'
-                       ' was provided.\nAborting...')
+                print('Could not determine cluster type and no list of nodes'
+                      ' was provided.\nAborting...'
+                      )
                 sys.exit()
 
     def get_nodes_from_cluster(self):
@@ -227,7 +234,7 @@ class ClusterSos():
             msg = ('\nLocal sosreport requires root. Provide sudo password'
                    'or press ENTER to skip: ')
             self.local_sudopw = getpass(prompt=msg)
-            print '\n'
+            print('\n')
             if not self.local_sudopw:
                 return False
         return True
@@ -240,20 +247,22 @@ class ClusterSos():
             cmd += ' --tmp-dir=%s' % self.config['tmp_dir']
             if self.need_local_sudo:
                 cmd = 'echo %s | sudo -S %s' % (self.local_sudopw, cmd)
-            print "%-*s: %s" % (self.config['hostlen'] + 1,
+            print("%-*s: %s" % (self.config['hostlen'] + 1,
                                 self.config['hostname'],
                                 'Generating sosreport...'
                                 )
+                  )
             proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
             rc = proc.returncode
             if rc == 0:
                 self.retrieved += 1
-                print "%-*s: %s" % (self.config['hostlen'] + 1,
+                print("%-*s: %s" % (self.config['hostlen'] + 1,
                                     self.config['hostname'],
                                     'Retrieving sosreport...'
                                     )
+                      )
                 if self.need_local_sudo:
                     for line in stdout.split('\n'):
                         if fnmatch.fnmatch(line, '*sosreport-*tar*'):
@@ -272,12 +281,17 @@ class ClusterSos():
                     stdout, stderr = proc.communicate()
                     del(self.local_sudopw)
             else:
-                print "%-*s: %s %s" % (self.config['hostlen'] + 1,
+                print("%-*s: %s %s" % (self.config['hostlen'] + 1,
                                        self.config['hostname'],
                                        'Failed to collect sosreport'
                                        )
+                      )
         except Exception as e:
-            print e
+            print("%-*s: %s %s" % (self.config['hostlen'] + 1,
+                                   self.config['hostname'],
+                                   'Error running sosreport: %s' % e
+                                   )
+                  )
 
     def collect(self):
         ''' For each node, start a collection thread and then tar all
@@ -307,13 +321,14 @@ class ClusterSos():
             f = self.config['profile'].run_extra_cmd()
             if f:
                 self.master.collect_extra_cmd(f)
-        print '\nSuccessfully captured %s of %s sosreports' % (self.retrieved,
+        print('\nSuccessfully captured %s of %s sosreports' % (self.retrieved,
                                                                self.report_num
                                                                )
+              )
         if self.retrieved > 0:
             self.create_cluster_archive()
         else:
-            print 'No sosreports were collected, nothing to archive...'
+            print('No sosreports were collected, nothing to archive...')
             sys.exit(100)
         self.close_all_connections()
 
@@ -325,13 +340,14 @@ class ClusterSos():
     def create_cluster_archive(self):
         '''Calls for creation of tar archive then cleans up the temporary
         files created by clustersos'''
-        print 'Creating archive of sosreports...'
+        print('Creating archive of sosreports...')
         self.create_sos_archive()
         if self.archive:
             self.cleanup()
-            print ('\nThe following archive has been created. Please '
-                   'provide it to your support team.')
-            print '    %s' % self.archive
+            print('\nThe following archive has been created. Please '
+                  'provide it to your support team.'
+                  )
+            print('    %s' % self.archive)
 
     def create_sos_archive(self):
         '''Creates a tar archive containing all collected sosreports'''
@@ -342,7 +358,7 @@ class ClusterSos():
                     tar.add(os.path.join(self.config['tmp_dir'], f), arcname=f)
                 tar.close()
         except Exception as e:
-            print e
+            print('Could not create archive: %s' % e)
             self.archive = False
 
     def cleanup(self):

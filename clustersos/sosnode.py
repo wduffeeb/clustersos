@@ -9,9 +9,9 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 import fnmatch
 import paramiko
 import subprocess
@@ -35,10 +35,9 @@ class SosNode():
 
     def info(self, msg):
         '''Used to print and log info messages'''
-        print '{: <.{}} : {}'.format((self.hostname or self.address),
-                                     self.config['hostlen'],
-                                     msg
-                                     )
+        host = (self.hostname or self.address)
+        host = host.decode('utf-8')
+        print('{:<{}} : {}'.format(host, self.config['hostlen'], msg))
 
     @property
     def scp_cmd(self):
@@ -102,7 +101,7 @@ class SosNode():
         '''Obtain information about the node which can be referneced by
         cluster profiles to change the sosreport command'''
         sin, sout, serr = self.client.exec_command('cat /etc/redhat-release')
-        self.host_facts['release'] = sout.read().strip()
+        self.host_facts['release'] = sout.read().strip().decode()
 
     def finalize_sos_cmd(self):
         '''Use host facts and compare to cluster profile to modify the sos
@@ -128,7 +127,7 @@ class SosNode():
 
     def execute_sos_command(self):
         '''Run sosreport and capture the resulting file path'''
-        self.info('Generating sosreport...')
+        self.info("Generating sosreport...")
         try:
             stdin, self.stdout, self.stderr = self.client.exec_command(
                                                 self.sos_cmd,

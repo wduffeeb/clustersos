@@ -9,10 +9,11 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 from clustersos.profiles import Profile
+
 
 class pacemaker(Profile):
 
@@ -28,14 +29,16 @@ class pacemaker(Profile):
     def parse_pcs_output(self, pcs):
         nodes = []
         warn = ('WARNING: corosync and pacemaker node names do not match '
-             '(IPs used in setup?)')
+                '(IPs used in setup?)'
+                )
         if warn in pcs:
-            print ('NOTE: pacemaker is reporting a node name mismatch. '
-                   'Attempts to connect to some of these nodes may fail\n')
-        for s in ['Online', 'Offline']:
+            print('NOTE: pacemaker is reporting a node name mismatch. '
+                  'Attempts to connect to some of these nodes may fail\n'
+                  )
+        for s in ["Online", "Offline"]:
             for i in pcs:
-                if i.startswith('%s:' % s):
-                    n = [i.split('[')[1].split(' ')[1:-1]][0]
-                    if n:
-                        nodes += n
+                if i.startswith(s):
+                    nlist = i.split('[')[1].split(']')[0]
+                    node = [n for n in nlist.split(' ') if n]
+                    nodes += node
         return nodes

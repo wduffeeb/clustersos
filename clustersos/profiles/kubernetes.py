@@ -9,9 +9,9 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 from clustersos.profiles import Profile
 
 
@@ -41,7 +41,7 @@ class kubernetes(Profile):
     def set_sos_prefix(self, facts):
         if 'Atomic' in facts['release']:
             cmd = 'atomic run --name=clustersos-tmp '
-            img = 'registry.access.redhat.com/rhel7/rhel-tools '
+            img = self.config['image']
             return cmd + img
 
     def set_sos_path_strip(self, facts):
