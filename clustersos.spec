@@ -2,7 +2,7 @@
 
 Summary: Capture sosreports from multiple nodes simultaneously
 Name: clustersos
-Version: 1.1.0
+Version: 1.1.1
 Release: 1%{?dist}
 Source0: http://people.redhat.com/jhunsake/clustersos/releases/clustersos-%{version}.tar.gz
 License: GPLv2
@@ -39,9 +39,15 @@ install -m644 ${RPM_BUILD_DIR}/%{name}-%{version}/man/en/clustersosreport.1 ${RP
 %files
 %{_bindir}/clustersosreport
 %{python_sitelib}/*
-%{_mandir}/man1/clustersosreport.1.gz
+%{_mandir}/man1/*
 
 %changelog
+* Fri Jul 28 2017 Jake Hunsaker <jhunsake@redhat.com> 1.1.1-1
+- Added ovirt profile
+- Fixed sosreport option handling
+- Improved error reporting
+- Packaging aligned for distribution
+
 * Tue Jul 18 2017 Jake Hunsaker <jhunsake@redhat.com> 1.1.0-1
 - Basic profiles now available
 
