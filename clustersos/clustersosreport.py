@@ -181,6 +181,12 @@ class ClusterSos():
             self.config['sos_cmd'] += '--alloptions '
         if self.config['cluster_type']:
             self.config['profile'].modify_sos_cmd()
+        for opt in ['skip_plugins', 'enable_plugins', 'plugin_option']:
+            if opt in self.config:
+                option = ','.join(o for o in self.config[opt])
+                self.config['sos_cmd'] += '--%s=%s ' % (opt.replace('_', '-'),
+                                                        option
+                                                        )
 
     def connect_to_master(self):
         '''If run with --master, we will run profile checks again that

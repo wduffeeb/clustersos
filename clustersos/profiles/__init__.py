@@ -137,6 +137,10 @@ class Profile():
         return False
 
     def get_nodes(self):
+        '''This MUST be overridden by a profile.
+        A profile should use this method to return a list or string that
+        contains all the nodes that a report should be collected from
+        '''
         pass
 
     def _get_nodes(self):
@@ -158,14 +162,17 @@ class Profile():
         if self.sos_plugins:
             for plug in self.sos_plugins:
                 if plug not in self.config['sos_cmd']:
-                    self.config['sos_cmd'] += '-e %s ' % plug
+                    self.config['enable_plugins'].append(plug)
         if self.sos_options:
             for opt in self.sos_options:
                 if opt not in self.config['sos_cmd']:
-                    cmd = '-k %s=%s ' % (opt, self.sos_options[opt])
-                    self.config['sos_cmd'] += cmd
+                    option = '%s=%s' % (opt, self.sos_options[opt])
+                    self.config['plugin_option'].append(option)
 
     def format_node_list(self):
+        '''Format the returned list of nodes from a profile into a known
+        format. This being a list that contains no duplicates
+        '''
         try:
             nodes = self.get_nodes()
             if isinstance(nodes, list):

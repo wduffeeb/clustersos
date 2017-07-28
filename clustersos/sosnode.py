@@ -61,7 +61,10 @@ class SosNode():
         self.execute_sos_command()
         if self.sos_path:
             self.retrieved = self.retrieve_sosreport()
+        try:
             self.cleanup()
+        except:
+            pass
 
     def open_ssh_session(self):
         '''Create the persistent ssh session we use on the node'''

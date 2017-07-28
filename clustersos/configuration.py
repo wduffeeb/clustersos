@@ -23,7 +23,7 @@ class Configuration(dict):
         self.parser = parser
         self.set_defaults()
         self.parse_config()
-        self.parse_cluster_options()
+        self.parse_options()
 
     def set_defaults(self):
         self['sos_mod'] = {}
@@ -59,10 +59,13 @@ class Configuration(dict):
             if args[k]:
                 self[k] = args[k]
 
-    def parse_cluster_options(self):
+    def parse_options(self):
         if self['cluster_options']:
             opts = {}
             for opt in self['cluster_options']:
                 k, v = opt.split('=', 1)
                 opts[k] = v
             self['cluster_options'] = opts
+        for opt in ['skip_plugins', 'enable_plugins', 'plugin_option']:
+            if self[opt]:
+                self[opt] = [o for o in self[opt].split(',')]
