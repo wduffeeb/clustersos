@@ -201,12 +201,16 @@ class SosNode():
 
     def collect_extra_cmd(self, filename):
         '''Collect the file created by a profile outside of sos'''
-        scp = self.scp_cmd.replace(self.sos_path, filename)
-        proc = subprocess.Popen(scp,
-                                shell=True,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE
-                                )
-        sout, serr = proc.communicate()
-        if proc.returncode == 0:
-            return True
+        try:
+            scp = self.scp_cmd.replace(self.sos_path, filename)
+            proc = subprocess.Popen(scp,
+                                    shell=True,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE
+                                    )
+            sout, serr = proc.communicate()
+            if proc.returncode == 0:
+                return True
+        except Exception as e:
+            print('Failed to collect additional data from master: %s' % e)
+            return False

@@ -31,7 +31,7 @@ class Configuration(dict):
         self['strip_sos_path'] = ''
         self['ssh_port'] = '22'
         self['ssh_user'] = 'root'
-        self['sos_cmd'] = 'sosreport --batch '
+        self['sos_cmd'] = '/usr/sbin/sosreport --batch '
         self['no_local'] = False
         self['tmp_dir'] = ''
         self['out_dir'] = '/var/tmp/'
@@ -50,8 +50,11 @@ class Configuration(dict):
         self['hostname'] = socket.gethostname()
         ips = [i[4][0] for i in socket.getaddrinfo(socket.gethostname(), None)]
         self['ip_addrs'] = list(set(ips))
-        self['cluster_options'] = []
+        self['cluster_options'] = ''
         self['image'] = 'rhel7/rhel-tools '
+        self['skip_plugins'] = []
+        self['enable_plugins'] = []
+        self['plugin_option'] = []
 
     def parse_config(self):
         args = vars(self.parser.parse_args())
@@ -61,10 +64,17 @@ class Configuration(dict):
 
     def parse_options(self):
         if self['cluster_options']:
+            if isinstance(self['cluster_options'], str):
+                self['cluster_options'] = [o for o in
+                                           self['cluster_options'].split(',')
+                                           ]
             opts = {}
             for opt in self['cluster_options']:
-                k, v = opt.split('=', 1)
-                opts[k] = v
+                try:
+                    k, v = opt.split('=', 1)
+                    opts[k] = v
+                except:
+                    opts[opt] = True
             self['cluster_options'] = opts
         for opt in ['skip_plugins', 'enable_plugins', 'plugin_option']:
             if self[opt]:

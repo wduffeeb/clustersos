@@ -37,13 +37,13 @@ if __name__ == '__main__':
     parser.add_argument('--cluster-type',
                         help='Specify a type of cluster profile'
                         )
-    parser.add_argument('-c', '--cluster-option', type=str, action="append",
-                        dest='cluster_options',
+    parser.add_argument('-c', '--cluster-option', dest='cluster_options',
                         help=('Specify a cluster options used by a profile'
                               ' and takes the form of cluster.option=value'
                               )
                         )
     parser.add_argument('-e', '--enable-plugins', required=False,
+                        default='',
                         help='Enable specific plugins for sosreport'
                         )
     parser.add_argument('--image', help=('Specify the container image to use'
@@ -52,9 +52,12 @@ if __name__ == '__main__':
                                          )
                         )
     parser.add_argument('-k', '--plugin-option',
+                        default='',
                         help='Plugin option as plugname.option=value'
                         )
-    parser.add_argument('-n', '--skip-plugins', help='Skip these plugins')
+    parser.add_argument('-n', '--skip-plugins', default='',
+                        help='Skip these plugins'
+                        )
     parser.add_argument('--name', help='Specify customer name')
     parser.add_argument('--nodes',
                         help='Provide a comma delimited list of nodes')

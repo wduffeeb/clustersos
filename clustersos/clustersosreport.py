@@ -147,17 +147,17 @@ class ClusterSos():
             self.config['profile'] = self.profiles[self.config['cluster_type']]
         else:
             self.determine_cluster()
+        print('Cluster type has been set to %s' % self.config['cluster_type'])
         if not self.config['tmp_dir']:
             self.create_tmp_dir()
         self.get_nodes()
-        self.configure_sos_cmd()
         self.intro()
+        self.configure_sos_cmd()
 
     def intro(self):
         '''Prints initial messages and collects user and case if not
         provided already.
         '''
-        print('Cluster type has been set to %s' % self.config['cluster_type'])
         print('\nThe following is a list of nodes to collect from:')
         if self.master:
             print('\t%-*s' % (self.config['hostlen'], self.config['master']))
@@ -182,7 +182,7 @@ class ClusterSos():
         if self.config['cluster_type']:
             self.config['profile'].modify_sos_cmd()
         for opt in ['skip_plugins', 'enable_plugins', 'plugin_option']:
-            if opt in self.config:
+            if opt in self.config and self.config[opt]:
                 option = ','.join(o for o in self.config[opt])
                 self.config['sos_cmd'] += '--%s=%s ' % (opt.replace('_', '-'),
                                                         option
@@ -345,7 +345,8 @@ class ClusterSos():
         for node in self.workers:
             if node.retrieved:
                 self.retrieved += 1
-        if self.master:
+        if hasattr(self.config['profile'], 'run_extra_cmd'):
+            print('Collecting additional data from master node...')
             f = self.config['profile'].run_extra_cmd()
             if f:
                 self.master.collect_extra_cmd(f)

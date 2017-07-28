@@ -183,16 +183,3 @@ class Profile():
             return node_list
         except Exception as e:
             print('Failed to format node list: %s' % e)
-
-    def run_extra_cmd(self):
-        '''This method is called against the master/local node at the end
-        of collection. It is meant to be used to specify additional data
-        that should be collected along with sosreports.
-
-        Ideally, anything specified here should eventually make its way
-        into sos.
-
-        If a cluster uses this command, it should return a file path or a
-        list of file paths.
-        '''
-        return False
