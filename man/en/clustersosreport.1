@@ -115,7 +115,7 @@ generated to not contain the relevant output for a given type of cluster.
 You an either supply multiple \fB-o\fR options, or provide a comma-delimited list.
 .TP
 \fB\-p\fR SSH_PORT, \fB\-\-ssh\-port\fR SSH_PORT
-Specify SSH port for all nodes. Use this is SSH runs on any port other than 22.
+Specify SSH port for all nodes. Use this if SSH runs on any port other than 22.
 .TP
 \fB\-\-ssh\-user\fR SSH_USER
 Specify an SSH user for clustersos to connect to nodes with. Default is root.
@@ -127,7 +127,7 @@ and as such clustersos will prompt you for a sudo password.
 Timeout for sosreport generation on each node, in seconds.
 
 Note that sosreports are collected in parallel, so this can also be considered to be
-approximately the same as a timeout for the entire clustersos command. 
+approximately the same as a timeout for the entire collection process. 
 
 Default is 180 seconds.
 .TP
