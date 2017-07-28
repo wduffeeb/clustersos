@@ -120,10 +120,13 @@ class SosNode():
         return path
 
     def determine_sos_error(self, rc, stdout):
+        if rc == -1:
+            msg = 'sosreport process received SIGKILL on node'
         if rc == 137:
-            return "sosreport killed on node"
+            msg = 'sosreport terminated unexpectedly. Check disk space'
         if len(stdout) > 0:
-            return stdout[-1]
+            msg = stdout[-1]
+        return msg
 
     def execute_sos_command(self):
         '''Run sosreport and capture the resulting file path'''

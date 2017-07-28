@@ -42,6 +42,16 @@ class ClusterSos():
         self.retrieved = 0
         self.prep()
 
+    def _exit(self, msg, error=1):
+        '''Used to safely terminate if clustersos encounters an error'''
+        print(msg)
+        try:
+            self.close_all_connections()
+            self.cleanup()
+        except:
+            pass
+        sys.exit(error)
+
     def create_tmp_dir(self):
         '''Creates a temp directory to transfer sosreports to'''
         tmpdir = tempfile.mkdtemp()
@@ -53,6 +63,9 @@ class ClusterSos():
         shutil.rmtree(self.config['tmp_dir'])
 
     def _load_profiles(self):
+        '''Load an instance of each profile so that clustersos can later
+        determine what type of cluster is in use
+        '''
         if 'clustersos' not in os.listdir(os.getcwd()):
             p = get_python_lib()
             path = p + '/clustersos/profiles/'
@@ -69,6 +82,7 @@ class ClusterSos():
         sys.path.pop(0)
 
     def _get_archive_name(self):
+        '''Generates a name for the tarball archive'''
         nstr = 'clustersos'
         if self.config['name']:
             nstr += '-%s' % self.config['name']
@@ -85,6 +99,9 @@ class ClusterSos():
         return '%s-%s-%s' % (nstr, dt, rand)
 
     def _get_archive_path(self):
+        '''Returns the path, including filename, of the tarball we build
+        that contains the collected sosreports
+        '''
         name = self._get_archive_name()
         compr = 'gz'
         return self.config['out_dir'] + name + '.tar.' + compr
@@ -178,7 +195,7 @@ class ClusterSos():
         the user, then we abort.
 
         If a list of nodes is given, this is not run, however the profile
-        can still be run if the user sets --profile when running clustersos
+        can still be run if the user sets a --cluster-type manually
         '''
 
         for prof in self.profiles:
@@ -187,10 +204,10 @@ class ClusterSos():
                 name = str(self.profiles[prof].__class__.__name__).lower()
                 self.config['cluster_type'] = name
                 break
-                print('Could not determine cluster type and no list of nodes'
-                      ' was provided.\nAborting...'
-                      )
-                sys.exit()
+                msg = ('Could not determine cluster profile and no list of '
+                       'nodes was provided.\nAborting...'
+                       )
+                self._exit(msg)
 
     def get_nodes_from_cluster(self):
         '''Collects the list of nodes from the determined cluster profile'''
@@ -214,6 +231,11 @@ class ClusterSos():
 
     def get_nodes(self):
         ''' Sets the list of nodes to collect sosreports from '''
+        if not self.config['master'] and not self.config['profile']:
+            msg = ('Could not determine a cluster profile and no list of '
+                   'nodes or master node was provided.\nAborting...'
+                   )
+            self._exit(msg)
         if self.config['nodes']:
             self.node_list = [n for n in self.config['nodes'].split(',')]
         else:
@@ -328,8 +350,8 @@ class ClusterSos():
         if self.retrieved > 0:
             self.create_cluster_archive()
         else:
-            print('No sosreports were collected, nothing to archive...')
-            sys.exit(100)
+            msg = 'No sosreports were collected, nothing to archive...'
+            self._exit(msg)
         self.close_all_connections()
 
     def close_all_connections(self):
@@ -358,8 +380,8 @@ class ClusterSos():
                     tar.add(os.path.join(self.config['tmp_dir'], f), arcname=f)
                 tar.close()
         except Exception as e:
-            print('Could not create archive: %s' % e)
-            self.archive = False
+            msg = 'Could not create archive: %s' % e
+            self._exit(msg)
 
     def cleanup(self):
         ''' Removes the tmp dir and all sosarchives therein.
