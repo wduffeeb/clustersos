@@ -41,7 +41,10 @@ class ClusterSos():
         self.client_list = []
         self.master = False
         self.retrieved = 0
-        self.prep()
+        if not self.config['list_options']:
+            self.prep()
+        else:
+            self._load_profiles()
 
     def _exit(self, msg, error=1):
         '''Used to safely terminate if clustersos encounters an error'''
@@ -58,6 +61,24 @@ class ClusterSos():
         tmpdir = tempfile.mkdtemp()
         self.config['tmp_dir'] = tmpdir
         self.config['tmp_dir_created'] = True
+
+    def list_options(self):
+        '''Display options for available profiles'''
+        print('\nThe following profile options are available:\n')
+        print('{:30} {:<10} {:<}'.format('Option Name', 'Type', 'Description'))
+
+        for prof in self.profiles:
+            if hasattr(self.profiles[prof], 'option_list'):
+                for opt in self.profiles[prof].option_list:
+                    option = '{}.{}'.format(prof, opt[0])
+                    optln = '{:30} {:<10} {:<}'.format(option,
+                                                       opt[1],
+                                                       opt[2]
+                                                       )
+                    print(optln)
+        print('\nOptions with no type listed are simple on/off switches'
+              '\n E.G. using \'ovirt.no-database\' enables that option'
+              )
 
     def delete_tmp_dir(self):
         '''Removes the temp directory and all collected sosreports'''

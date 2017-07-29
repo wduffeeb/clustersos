@@ -25,8 +25,9 @@ class ovirt(Profile):
     sos_plugins = ['ovirt']
 
     option_list = [
-                   ('no-database', 'Do not collect a database dump'),
-                   ('cluster', 'Only collect from hosts in this cluster')
+                   ('no-database', '', 'Do not collect a database dump'),
+                   ('cluster', 'string',
+                    'Only collect from hosts in this cluster')
                    ]
 
     def get_nodes(self):

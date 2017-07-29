@@ -55,6 +55,9 @@ if __name__ == '__main__':
                         default='',
                         help='Plugin option as plugname.option=value'
                         )
+    parser.add_argument('-l', '--list-options', action="store_true",
+                        help='List options available for profiles'
+                        )
     parser.add_argument('-n', '--skip-plugins', default='',
                         help='Skip these plugins'
                         )
@@ -84,8 +87,12 @@ if __name__ == '__main__':
                         )
 
     try:
-        config = Configuration(parser)
+        args = vars(parser.parse_args())
+        config = Configuration(args)
         cs = ClusterSos(config)
-        cs.collect()
+        if not args['list_options']:
+            cs.collect()
+        else:
+            cs.list_options()
     except KeyboardInterrupt:
         raise SystemExit()

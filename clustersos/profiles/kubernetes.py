@@ -22,7 +22,8 @@ class kubernetes(Profile):
     packages = ('kubernetes-master', 'atomic-openshift-master')
 
     option_list = [
-                ('label', 'Restrict nodes to those with matching label')
+                ('label', 'string',
+                 'Restrict nodes to those with matching label')
                 ]
 
     def get_nodes(self):

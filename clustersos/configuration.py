@@ -19,8 +19,8 @@ class Configuration(dict):
     """ Dict subclass that is used to handle configuration information
     needed by both ClusterSos and the SosNode classes """
 
-    def __init__(self, parser=None):
-        self.parser = parser
+    def __init__(self, args=None):
+        self.args = args
         self.set_defaults()
         self.parse_config()
         self.parse_options()
@@ -55,12 +55,12 @@ class Configuration(dict):
         self['skip_plugins'] = []
         self['enable_plugins'] = []
         self['plugin_option'] = []
+        self['list_options'] = False
 
     def parse_config(self):
-        args = vars(self.parser.parse_args())
-        for k in args:
-            if args[k]:
-                self[k] = args[k]
+        for k in self.args:
+            if self.args[k]:
+                self[k] = self.args[k]
 
     def parse_options(self):
         if self['cluster_options']:
