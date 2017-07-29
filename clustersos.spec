@@ -4,7 +4,7 @@ Summary: Capture sosreports from multiple nodes simultaneously
 Name: clustersos
 Version: 1.1.1
 Release: 1%{?dist}
-Source0: https://github.com/TurboTurtle/clustersos/archive/%{name}-%{version}.tar.gz
+Source0: http://people.redhat.com/jhunsake/clustersos/releases/%{name}-%{version}.tar.gz
 License: GPLv2
 BuildArch: noarch
 BuildRequires: python2-devel
