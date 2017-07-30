@@ -56,6 +56,7 @@ class Configuration(dict):
         self['enable_plugins'] = []
         self['plugin_option'] = []
         self['list_options'] = False
+        self['hostlen'] = len(self['master']) or len(self['hostname'])
 
     def parse_config(self):
         for k in self.args:
