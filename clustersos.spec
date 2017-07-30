@@ -1,4 +1,3 @@
-%{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 
 Summary: Capture sosreports from multiple nodes simultaneously
 Name: clustersos
@@ -10,8 +9,8 @@ BuildArch: noarch
 BuildRequires: python2-devel
 Url: https://github.com/TurboTurtle/clustersos
 Requires: python >= 2.6
-Requires: python-paramiko >= 1.6
 Requires: sos >= 3.0
+Requires: python2dist(paramiko) >= 1.6
 
 
 %description
@@ -28,6 +27,8 @@ is run on the nodes.
 
 %install
 mkdir -p ${RPM_BUILD_ROOT}%{_mandir}/man1
+mkdir -p ${RPM_BUILD_ROOT}%{license}
+install -m444 ${RPM_BUILD_DIR}/%{name}-%{version}/LICENSE ${RPM_BUILD_ROOT}%{license}
 install -m644 ${RPM_BUILD_DIR}/%{name}-%{version}/man/en/clustersosreport.1 ${RPM_BUILD_ROOT}%{_mandir}/man1/
 %py2_install
 
@@ -38,8 +39,10 @@ install -m644 ${RPM_BUILD_DIR}/%{name}-%{version}/man/en/clustersosreport.1 ${RP
 
 %files
 %{_bindir}/clustersosreport
-%{python_sitelib}/*
+%{python2_sitelib}/*
 %{_mandir}/man1/*
+
+%license LICENSE
 
 %changelog
 * Fri Jul 28 2017 Jake Hunsaker <jhunsake@redhat.com> 1.1.1-1
