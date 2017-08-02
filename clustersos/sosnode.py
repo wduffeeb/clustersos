@@ -17,7 +17,7 @@ import paramiko
 import subprocess
 import sys
 
-from socket import timeout
+from socket import gaierror, timeout
 
 
 class SosNode():
@@ -85,6 +85,11 @@ class SosNode():
         except paramiko.BadHostKeyException:
             msg = ("Host key received was rejected by local SSH client."
                    " Check ~/.ssh/known_hosts.")
+        except gaierror as err:
+            if err.errno == -2:
+                msg = ("Provided hostname did not resolve.")
+            else:
+                msg = err.message
         except Exception as e:
             msg = '%s' % e
         if msg:
