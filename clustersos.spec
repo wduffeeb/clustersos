@@ -10,6 +10,7 @@ BuildRequires: python2-devel
 Url: https://github.com/TurboTurtle/clustersos
 Requires: python >= 2.6
 Requires: sos >= 3.0
+Requires: python-six
 Requires: python2dist(paramiko) >= 1.6
 
 
