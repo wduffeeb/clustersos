@@ -29,9 +29,12 @@ class SosNode():
         self.sos_path = None
         self.retrieved = False
         self.host_facts = {}
-        self.open_ssh_session()
-        self.get_hostname()
-        self.load_host_facts()
+        try:
+            self.open_ssh_session()
+            self.get_hostname()
+            self.load_host_facts()
+        except:
+            self.connected = False
 
     def info(self, msg):
         '''Used to print and log info messages'''
@@ -77,6 +80,7 @@ class SosNode():
                                 username=self.config['ssh_user'],
                                 timeout=15
                                 )
+            self.connected = True
         except paramiko.AuthenticationException:
             msg = ("Authentication failed. Have you installed SSH keys?")
         except paramiko.BadAuthenticationType:
@@ -94,7 +98,7 @@ class SosNode():
             msg = '%s' % e
         if msg:
             self.info(msg)
-            sys.exit()
+            raise
 
     def close_ssh_session(self):
         '''Handle closing the SSH session'''
@@ -115,6 +119,8 @@ class SosNode():
         '''Use host facts and compare to cluster profile to modify the sos
         command if needed'''
         self.sos_cmd = self.config['sos_cmd']
+        if self.config['need_sudo']:
+            self.sos_cmd = 'sudo -S %s' % self.sos_cmd
         prefix = self.config['profile'].get_sos_prefix(self.host_facts)
         if prefix:
             self.sos_cmd = prefix + ' ' + self.sos_cmd
@@ -145,6 +151,9 @@ class SosNode():
                                                 timeout=self.config['timeout'],
                                                 get_pty=True
                                             )
+            if self.config['need_sudo']:
+                stdin.write(self.config['sudo_pw'] + '\n')
+                stdin.flush()
             while not self.stdout.channel.exit_status_ready():
                 if self.stdout.channel.recv_ready():
                     for line in iter(lambda: self.stdout.readline(1024), ""):
@@ -167,6 +176,11 @@ class SosNode():
     def retrieve_sosreport(self):
         '''Collect the sosreport archive from the node'''
         if self.sos_path:
+            if self.config['need_sudo']:
+                f = self.make_archive_readable(self.sos_path)
+                if not f:
+                    self.info('Failed to make archive readable')
+                    return False
             self.info('Retrieving sosreport...')
             proc = subprocess.Popen(self.scp_cmd,
                                     shell=True,
@@ -174,6 +188,7 @@ class SosNode():
                                     stderr=subprocess.PIPE
                                     )
             stdout, stderr = proc.communicate()
+            print stdout
             rc = proc.returncode
             if rc == 0:
                 return True
@@ -207,6 +222,11 @@ class SosNode():
     def collect_extra_cmd(self, filename):
         '''Collect the file created by a profile outside of sos'''
         try:
+            if self.config['need_sudo']:
+                f = self.make_archive_readable(filename)
+                if not f:
+                    print('Failed to make extra data file readable')
+                    return False
             scp = self.scp_cmd.replace(self.sos_path, filename)
             proc = subprocess.Popen(scp,
                                     shell=True,
@@ -218,4 +238,21 @@ class SosNode():
                 return True
         except Exception as e:
             print('Failed to collect additional data from master: %s' % e)
+            return False
+
+    def make_archive_readable(self, filepath):
+        '''Used to make the given archive world-readable, which is slightly
+        better than changing the ownership outright.
+        '''
+        cmd = 'sudo -S chmod +r %s' % filepath
+        sin, sout, serr = self.client.exec_command(cmd,
+                                                   timeout=10,
+                                                   get_pty=True
+                                                   )
+        sin.write(self.config['sudo_pw'] + '\n')
+        sin.flush()
+        rc = self.stdout.channel.recv_exit_status()
+        if rc == 0:
+            return True
+        else:
             return False

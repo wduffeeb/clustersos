@@ -159,6 +159,10 @@ class ClusterSos():
         print('Please note that clustersos REQUIRES key authentication '
               'for SSH to be in place for node sosreport collection\n'
               )
+        if self.config['need_sudo']:
+            msg = ('A non-root user has been provided. Provide sudo password'
+                   ' for %s on remote nodes: ' % self.config['ssh_user'])
+            self.config['sudo_pw'] = getpass(prompt=msg)
         if self.config['master']:
             self.connect_to_master()
             self.config['no_local'] = True
@@ -215,6 +219,9 @@ class ClusterSos():
         instead of the localhost.
         '''
         self.master = SosNode(self.config['master'], self.config)
+        if not self.master.connected:
+            msg = ('Could not connect to master node.\nAborting...')
+            self._exit(msg)
 
     def determine_cluster(self):
         '''This sets the cluster type and loads that cluster's profile.
@@ -356,7 +363,8 @@ class ClusterSos():
             self.client_list.append(self.master)
         for node in self.node_list:
             client = SosNode(node, self.config)
-            self.client_list.append(client)
+            if client.connected:
+                self.client_list.append(client)
         for client in self.client_list:
             worker = threading.Thread(target=client.sosreport)
             worker.start()

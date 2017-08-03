@@ -24,6 +24,7 @@ class Configuration(dict):
         self.set_defaults()
         self.parse_config()
         self.parse_options()
+        self.check_user_privs()
 
     def set_defaults(self):
         self['sos_mod'] = {}
@@ -57,6 +58,8 @@ class Configuration(dict):
         self['plugin_option'] = []
         self['list_options'] = False
         self['hostlen'] = len(self['master']) or len(self['hostname'])
+        self['need_sudo'] = False
+        self['sudo_pw'] = ''
 
     def parse_config(self):
         for k in self.args:
@@ -80,3 +83,7 @@ class Configuration(dict):
         for opt in ['skip_plugins', 'enable_plugins', 'plugin_option']:
             if self[opt]:
                 self[opt] = [o for o in self[opt].split(',')]
+
+    def check_user_privs(self):
+        if not self['ssh_user'] == 'root':
+            self['need_sudo'] = True

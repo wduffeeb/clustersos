@@ -54,10 +54,19 @@ class Profile():
     def exec_master_cmd(self, cmd):
         '''Used to retrieve output from a (master) node in a cluster
         profile.'''
+        if self.config['need_sudo']:
+            cmd = 'sudo -S %s' % cmd
         if self.master:
-            stdin, stdout, stderr = self.master.client.exec_command(cmd)
+            sin, stdout, serr = self.master.client.exec_command(cmd,
+                                                                get_pty=True
+                                                                )
+            if self.config['need_sudo']:
+                sin.write(self.config['sudo_pw'] + '\n')
+                sin.flush()
             rc = stdout.channel.recv_exit_status()
             sout = stdout.read().splitlines()
+            if 'password for' in sout[0]:
+                sout.pop(0)
             if rc == 0:
                 return ([s.decode('utf-8') for s in sout] or True)
             else:
