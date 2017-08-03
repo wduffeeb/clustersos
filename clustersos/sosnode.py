@@ -188,7 +188,6 @@ class SosNode():
                                     stderr=subprocess.PIPE
                                     )
             stdout, stderr = proc.communicate()
-            print stdout
             rc = proc.returncode
             if rc == 0:
                 return True
