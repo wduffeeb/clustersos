@@ -42,6 +42,6 @@ You can run clustersos from the git checkout, E.G.
 
 `$ ./clustersosreport`
 
-To make an rpm, just run
+To make an rpm, you can run `python setup.py sdist` to create a source tarball for use along with `rpmbuild`.
 
-`# make rpm`
+Currently `clustersos` is available for Fedora Rawhide and is working its way into F26.
