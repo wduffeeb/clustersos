@@ -79,7 +79,7 @@ class Profile():
         stdout, stderr = proc.communicate()
         rc = proc.returncode
         if proc.returncode == 0:
-            sout = stdout.read().splitlines()
+            sout = stdout.splitlines()
             return ([s.decode('utf-8') for s in sout] or True)
         return False
 

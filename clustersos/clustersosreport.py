@@ -41,6 +41,7 @@ class ClusterSos():
         self.client_list = []
         self.master = False
         self.retrieved = 0
+        self.need_local_sudo = False
         if not self.config['list_options']:
             self.prep()
         else:
@@ -251,8 +252,7 @@ class ClusterSos():
     def reduce_node_list(self):
         '''Reduce duplicate entries of the localhost and/or master node
         if applicable'''
-        if (self.config['hostname'] in self.node_list and not
-                self.config['no_local']):
+        if (self.config['hostname'] in self.node_list and self.config['no_local']):
             self.node_list.remove(self.config['hostname'])
         for i in self.config['ip_addrs']:
             if i in self.node_list:
@@ -303,23 +303,23 @@ class ClusterSos():
             cmd = self.config['sos_cmd']
             cmd += ' --tmp-dir=%s' % self.config['tmp_dir']
             if self.need_local_sudo:
-                cmd = 'echo %s | sudo -S %s' % (self.local_sudopw, cmd)
-            print("%-*s: %s" % (self.config['hostlen'] + 1,
-                                self.config['hostname'],
-                                'Generating sosreport...'
-                                )
-                  )
+                cmd = 'sudo -S %s' % (cmd)
+            print('{:<{}} : {}'.format(self.config['hostname'],
+                                       self.config['hostlen'],
+                                       'Generating sosreport...'
+                                       )
+                                    )
             proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
             rc = proc.returncode
             if rc == 0:
                 self.retrieved += 1
-                print("%-*s: %s" % (self.config['hostlen'] + 1,
-                                    self.config['hostname'],
-                                    'Retrieving sosreport...'
-                                    )
-                      )
+                print('{:<{}} : {}'.format(self.config['hostname'],
+                                           self.config['hostlen'],
+                                           'Retrieving sosreport...'
+                                           )
+                                        )
                 if self.need_local_sudo:
                     for line in stdout.split('\n'):
                         if fnmatch.fnmatch(line, '*sosreport-*tar*'):
@@ -359,6 +359,7 @@ class ClusterSos():
                 worker = threading.Thread(target=self.local_sosreport)
                 worker.start()
                 self.threads.append(worker)
+                self.node_list.remove(self.config['hostname'])
         if self.master:
             self.client_list.append(self.master)
         for node in self.node_list:
