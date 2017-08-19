@@ -79,7 +79,8 @@ class Profile():
         stdout, stderr = proc.communicate()
         rc = proc.returncode
         if proc.returncode == 0:
-            return str(stdout, 'utf-8')
+            sout = stdout.read().splitlines()
+            return ([s.decode('utf-8') for s in sout] or True)
         return False
 
     def get_sos_prefix(self, facts):
