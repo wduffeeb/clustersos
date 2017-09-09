@@ -33,9 +33,9 @@ class ovirt(Profile):
     def get_nodes(self):
         if not self.get_option('no-database'):
             self.conf = self.parse_db_conf()
-            self.get_db = self.check_db_password()
+            self.pg_pass = self.get_db_password()
         else:
-            self.get_db = False
+            self.pg_pass = False
         dbcmd = '/usr/share/ovirt-engine/dbscripts/engine-psql.sh -c '
         if not self.get_option('cluster'):
             dbcmd += '"select host_name from vds_static"'
@@ -48,24 +48,18 @@ class ovirt(Profile):
         return [n.strip() for n in nodes]
 
     def run_extra_cmd(self):
-        if self.get_db:
+        if self.pg_pass:
             return self.collect_database()
         return False
 
-    def check_db_password(self):
+    def get_db_password(self):
         if not self.conf:
             print('Could not parse database configuration. Will not attempt '
                   'to collect a database dump from the manager'
                   )
             return False
         pg_pass = getpass('Please provide the engine database password: ')
-        if pg_pass == self.conf['ENGINE_DB_PASSWORD']:
-            return True
-        else:
-            print('Password does not match configuration password. Will not '
-                  'collect database dump from the manager'
-                  )
-            return False
+        return pg_pass
 
     def parse_db_conf(self):
         conf = {}
@@ -91,7 +85,7 @@ class ovirt(Profile):
                             )
         cmd = ('PGPASSWORD={} /usr/sbin/sosreport --name=postgresqldb '
                '--batch -o postgresql {}'
-               ).format(self.conf['ENGINE_DB_PASSWORD'], sos_opt)
+               ).format(self.pg_pass, sos_opt)
         db_sos = self.exec_master_cmd(cmd)
         for line in db_sos:
             if fnmatch.fnmatch(line, '*sosreport-*tar*'):
