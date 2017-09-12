@@ -267,6 +267,7 @@ class ClusterSos():
             for n in self.node_list:
                 if n == self.master.hostname or n == self.config['master']:
                     self.node_list.remove(n)
+        self.node_list = list(set(self.node_list))
 
     def get_nodes(self):
         ''' Sets the list of nodes to collect sosreports from '''
@@ -280,6 +281,11 @@ class ClusterSos():
         else:
             self.node_list = self.get_nodes_from_cluster()
         if not self.config['master']:
+            host = self.config['hostname'].split('.')[0]
+            # trust the local hostname before the node report from cluster
+            for node in self.node_list:
+                if host == node.split('.')[0]:
+                    self.node_list.remove(node)
             self.node_list.append(self.config['hostname'])
         self.reduce_node_list()
         self.report_num = len(self.node_list)
@@ -363,7 +369,10 @@ class ClusterSos():
                 worker = threading.Thread(target=self.local_sosreport)
                 worker.start()
                 self.threads.append(worker)
-                self.node_list.remove(self.config['hostname'])
+                try:
+                    self.node_list.remove(self.config['hostname'])
+                except:
+                    pass
         if self.master:
             self.client_list.append(self.master)
         for node in self.node_list:
