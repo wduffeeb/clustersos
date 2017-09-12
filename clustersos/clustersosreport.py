@@ -174,6 +174,10 @@ class ClusterSos():
             self.config['profile'] = self.profiles[self.config['cluster_type']]
         else:
             self.determine_cluster()
+        if self.config['profile'] is None and not self.config['nodes']:
+            msg = ('Cluster type could not be determined and no nodes provided'
+                  '\nAborting...')
+            self._exit(msg, 1)
         print('Cluster type has been set to %s' % self.config['cluster_type'])
         if not self.config['tmp_dir']:
             self.create_tmp_dir()
