@@ -14,12 +14,10 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 from clustersos.profiles import Profile
 
+class openshift(Profile):
 
-class kubernetes(Profile):
-
-    sos_plugins = ['kubernetes']
-    sos_options = {'kubernetes.all': 'on'}
-    packages = ('kubernetes-master',)
+    sos_plugins = ['kubernetes', 'origin']
+    packages = ('atomic-openshift-utils',)
 
     option_list = [
                 ('label', 'string',
@@ -27,7 +25,7 @@ class kubernetes(Profile):
                 ]
 
     def get_nodes(self):
-        self.cmd = 'kubectl get nodes'
+        self.cmd = 'oc get nodes'
         if self.get_option('label'):
             self.cmd += '-l %s ' % self.get_option('label')
         n = self.exec_master_cmd(self.cmd)
