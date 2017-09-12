@@ -192,7 +192,7 @@ class ClusterSos():
         print('\nThe following is a list of nodes to collect from:')
         if self.master:
             print('\t%-*s' % (self.config['hostlen'], self.config['master']))
-        for node in self.node_list:
+        for node in sorted(self.node_list):
             print("\t%-*s" % (self.config['hostlen'], node))
 
         if not self.config['name']:
