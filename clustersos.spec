@@ -1,7 +1,7 @@
 
 Summary: Capture sosreports from multiple nodes simultaneously
 Name: clustersos
-Version: 1.1.2
+Version: 1.1.3
 Release: 1%{?dist}
 Source0: http://people.redhat.com/jhunsake/clustersos/releases/%{name}-%{version}.tar.gz
 License: GPLv2
@@ -46,6 +46,11 @@ install -m644 ${RPM_BUILD_DIR}/%{name}-%{version}/man/en/clustersosreport.1 ${RP
 %license LICENSE
 
 %changelog
+* Thu Sep 14 2017 Jake Hunsaker <jhunsake@redhat.com> 1.1.3-1
+- Fix double enumeration of localhost if localhost is node
+- Split OpenShift profile from Kubernetes (#11)
+- Fix run failure with cluster-type None
+
 * Sat Aug 19 2017 Jake Hunsaker <jhunsake@redhat.com> 1.1.2-1
 - Fix local sosreport command execution
 - Fix local node enumeration on some profiles (#6)
