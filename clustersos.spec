@@ -1,7 +1,7 @@
 
 Summary: Capture sosreports from multiple nodes simultaneously
 Name: clustersos
-Version: 1.1.3
+Version: 1.2.0
 Release: 1%{?dist}
 Source0: http://people.redhat.com/jhunsake/clustersos/releases/%{name}-%{version}.tar.gz
 License: GPLv2
@@ -46,6 +46,11 @@ install -m644 ${RPM_BUILD_DIR}/%{name}-%{version}/man/en/clustersosreport.1 ${RP
 %license LICENSE
 
 %changelog
+* Wed Oct 11 2017 Jake Hunsaker <jhunsake@redhat.com> 1.2.0-1
+- Moved to using python3 (#8)
+- Made Atomic Host checks the default behavior for profiles
+- Fixed error reporting from sos on nodes
+
 * Thu Sep 14 2017 Jake Hunsaker <jhunsake@redhat.com> 1.1.3-1
 - Fix double enumeration of localhost if localhost is node
 - Split OpenShift profile from Kubernetes (#11)

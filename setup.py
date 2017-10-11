@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='clustersos',
-    version='1.1.3',
+    version='1.2.0',
     description='Capture sosreports from multiple nodes simultaneously',
     long_description=("Clustersos is a utility designed to capture "
                       "sosreports from multiple nodes at once and "
