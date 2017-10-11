@@ -92,12 +92,18 @@ class Profile():
             return ''
 
     def set_sos_prefix(self, facts):
-        '''This should be overridden by cluster profiles when needed.
+        '''This may be overridden by cluster profiles when needed.
 
         In a profile this should return a string that is placed immediately
-        before the 'sosreport' command, but will be after sudo if needed
+        before the 'sosreport' command, but will be after sudo if needed.
+
+        If a profile overrides this, it will need to be known if the the
+        profile needs to be sensitive to cluster nodes being Atomic Hosts.
         '''
-        return ''
+        if 'Atomic' in facts['release']:
+            cmd = 'atomic run --name=clustersos-tmp '
+            img = self.config['image']
+            return cmd + img
 
     def get_sos_path_strip(self, facts):
         '''This calls set_sos_path_strip that is used by cluster profiles
@@ -109,13 +115,18 @@ class Profile():
             return ''
 
     def set_sos_path_strip(self, facts):
-        '''This should be overriden by a cluster profile and used to set
+        '''This may be overriden by a cluster profile and used to set
         a string to be stripped from the return sos path if needed.
 
         For example, on Atomic Host, the sosreport gets written under
         /host/var/tmp in the container, but is available to scp under the
-        standard /var/tmp after the container exits.'''
-        return ''
+        standard /var/tmp after the container exits.
+
+        If a profile overrides this, it will need to be known if the the
+        profile needs to be sensitive to cluster nodes being Atomic Hosts.
+        '''
+        if 'Atomic' in facts['release']:
+            return '/host'
 
     def get_cleanup_cmd(self, facts):
         '''This calls set_cleanup_cmd that is used by cluser profiles to
@@ -130,8 +141,13 @@ class Profile():
         an additional command to run during cleanup.
 
         The profile should return a string containing the full cleanup
-        command to run'''
-        return ''
+        command to run
+
+        If a profile overrides this, it will need to be known if the the
+        profile needs to be sensitive to cluster nodes being Atomic Hosts.
+        '''
+        if 'Atomic' in facts['release']:
+            return 'docker rm clustersos-tmp'
 
     def check_enabled(self):
         '''This may be overridden by cluster profiles

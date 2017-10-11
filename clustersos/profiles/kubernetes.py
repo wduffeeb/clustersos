@@ -34,17 +34,3 @@ class kubernetes(Profile):
         nodes = [node.split()[0] for node in n]
         nodes.remove("NAME")
         return nodes
-
-    def set_sos_prefix(self, facts):
-        if 'Atomic' in facts['release']:
-            cmd = 'atomic run --name=clustersos-tmp '
-            img = self.config['image']
-            return cmd + img
-
-    def set_sos_path_strip(self, facts):
-        if 'Atomic' in facts['release']:
-            return '/host'
-
-    def set_cleanup_cmd(self, facts):
-        if 'Atomic' in facts['release']:
-            return 'docker rm clustersos-tmp'
